@@ -1,0 +1,131 @@
+[
+  {
+    "id": "tops",
+    "name": "Tops",
+    "slug": "tops",
+    "description": "Stylish and comfortable activewear tops for every workout and occasion",
+    "image": "/images/category-tops.jpg",
+    "subcategories": [
+      {
+        "id": "one-shoulder",
+        "name": "One-Shoulder",
+        "slug": "one-shoulder",
+        "description": "Asymmetrical tops with modern appeal"
+      },
+      {
+        "id": "t-shirt",
+        "name": "T-Shirts",
+        "slug": "t-shirt",
+        "description": "Classic comfort for everyday wear"
+      },
+      {
+        "id": "singlet",
+        "name": "Singlets",
+        "slug": "singlet",
+        "description": "Sleeveless tops for maximum freedom"
+      },
+      {
+        "id": "jacket",
+        "name": "Jackets",
+        "slug": "jacket",
+        "description": "Layering pieces for style and warmth"
+      },
+      {
+        "id": "tank-top",
+        "name": "Tank Tops",
+        "slug": "tank-top",
+        "description": "Breathable tops for intense workouts"
+      },
+      {
+        "id": "long-top",
+        "name": "Long Tops",
+        "slug": "long-top",
+        "description": "Extended coverage with flowing silhouettes"
+      }
+    ]
+  },
+  {
+    "id": "bottoms",
+    "name": "Bottoms",
+    "slug": "bottoms",
+    "description": "High-performance bottoms for all your activities",
+    "image": "/images/category-bottoms.jpg",
+    "subcategories": [
+      {
+        "id": "shorts",
+        "name": "Shorts",
+        "slug": "shorts",
+        "description": "Comfortable shorts for active lifestyles"
+      },
+      {
+        "id": "leggings",
+        "name": "Leggings",
+        "slug": "leggings",
+        "description": "Stretch leggings for maximum flexibility"
+      },
+      {
+        "id": "skirts",
+        "name": "Skirts",
+        "slug": "skirts",
+        "description": "Athletic skirts with built-in comfort"
+      }
+    ]
+  },
+  {
+    "id": "sets",
+    "name": "Sets",
+    "slug": "sets",
+    "description": "Coordinated activewear sets for effortless style",
+    "image": "/images/category-sets.jpg",
+    "subcategories": [
+      {
+        "id": "romper",
+        "name": "Rompers",
+        "slug": "romper",
+        "description": "One-piece comfort and style"
+      },
+      {
+        "id": "singlet-short-set",
+        "name": "Singlet + Short Sets",
+        "slug": "singlet-short-set",
+        "description": "Perfect pairing for warm weather workouts"
+      },
+      {
+        "id": "singlet-leggings-set",
+        "name": "Singlet + Leggings Sets",
+        "slug": "singlet-leggings-set",
+        "description": "Classic combination for versatile wear"
+      },
+      {
+        "id": "jumpsuit",
+        "name": "Jumpsuits",
+        "slug": "jumpsuit",
+        "description": "Sophisticated one-piece activewear"
+      },
+      {
+        "id": "jacket-short-set",
+        "name": "Jacket + Short Sets",
+        "slug": "jacket-short-set",
+        "description": "Layered looks for transitional weather"
+      },
+      {
+        "id": "jacket-leggings-set",
+        "name": "Jacket + Leggings Sets",
+        "slug": "jacket-leggings-set",
+        "description": "Complete outfits for cooler days"
+      },
+      {
+        "id": "long-top-leggings-set",
+        "name": "Long-Top + Leggings Sets",
+        "slug": "long-top-leggings-set",
+        "description": "Flowing tops with fitted bottoms"
+      },
+      {
+        "id": "long-top-shorts-set",
+        "name": "Long-Top + Shorts Sets",
+        "slug": "long-top-shorts-set",
+        "description": "Relaxed tops with comfortable shorts"
+      }
+    ]
+  }
+] 

@@ -1,0 +1,524 @@
+[
+  {
+    "id": "prod_1",
+    "name": "Moana One-Shoulder Top",
+    "description": "A sleek and stylish one-shoulder activewear top perfect for yoga, pilates, or casual wear. Made from breathable, moisture-wicking fabric that moves with your body. Features a secure fit with built-in support.",
+    "price": 12500,
+    "originalPrice": null,
+    "category": "Tops",
+    "subcategory": "one-shoulder",
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "colors": [
+      {
+        "name": "Black",
+        "hex": "#000000",
+        "images": {
+          "front": "/images/moana-top-black-front.jpg",
+          "back": "/images/moana-top-black-back.jpg",
+          "detail": "/images/moana-top-black-detail.jpg"
+        }
+      },
+      {
+        "name": "Sage",
+        "hex": "#9CAF88",
+        "images": {
+          "front": "/images/moana-top-sage-front.jpg",
+          "back": "/images/moana-top-sage-back.jpg",
+          "detail": "/images/moana-top-sage-detail.jpg"
+        }
+      },
+      {
+        "name": "Navy",
+        "hex": "#1E3A8A",
+        "images": {
+          "front": "/images/moana-top-navy-front.jpg",
+          "back": "/images/moana-top-navy-back.jpg",
+          "detail": "/images/moana-top-navy-detail.jpg"
+        }
+      }
+    ],
+    "images": {
+      "front": "/images/moana-top-black-front.jpg",
+      "back": "/images/moana-top-black-back.jpg",
+      "detail": "/images/moana-top-black-detail.jpg"
+    },
+    "stock": {
+      "XS": 5,
+      "S": 8,
+      "M": 12,
+      "L": 10,
+      "XL": 6
+    },
+    "isNew": true,
+    "onSale": false,
+    "featured": true,
+    "rating": 4.8,
+    "reviewCount": 24,
+    "soldCount": 45,
+    "createdAt": "2024-01-15T10:00:00Z",
+    "updatedAt": "2024-01-15T10:00:00Z"
+  },
+  {
+    "id": "prod_2",
+    "name": "Claire Romper",
+    "description": "An elegant one-piece romper that combines comfort and style. Perfect for workouts, running errands, or lounging. Features a flattering cut with adjustable straps and breathable fabric.",
+    "price": 18500,
+    "originalPrice": 22000,
+    "category": "Sets",
+    "subcategory": "romper",
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "colors": [
+      {
+        "name": "Olive",
+        "hex": "#6B7739",
+        "images": {
+          "front": "/images/claire-romper-olive-front.jpg",
+          "back": "/images/claire-romper-olive-back.jpg",
+          "detail": "/images/claire-romper-olive-detail.jpg"
+        }
+      },
+      {
+        "name": "Black",
+        "hex": "#000000",
+        "images": {
+          "front": "/images/claire-romper-black-front.jpg",
+          "back": "/images/claire-romper-black-back.jpg",
+          "detail": "/images/claire-romper-black-detail.jpg"
+        }
+      },
+      {
+        "name": "Cream",
+        "hex": "#F5F5DC",
+        "images": {
+          "front": "/images/claire-romper-cream-front.jpg",
+          "back": "/images/claire-romper-cream-back.jpg",
+          "detail": "/images/claire-romper-cream-detail.jpg"
+        }
+      }
+    ],
+    "images": {
+      "front": "/images/claire-romper-olive-front.jpg",
+      "back": "/images/claire-romper-olive-back.jpg",
+      "detail": "/images/claire-romper-olive-detail.jpg"
+    },
+    "stock": {
+      "XS": 3,
+      "S": 7,
+      "M": 9,
+      "L": 8,
+      "XL": 4
+    },
+    "isNew": false,
+    "onSale": true,
+    "featured": true,
+    "rating": 4.6,
+    "reviewCount": 18,
+    "soldCount": 32,
+    "createdAt": "2024-01-10T14:30:00Z",
+    "updatedAt": "2024-01-10T14:30:00Z"
+  },
+  {
+    "id": "prod_3",
+    "name": "Cecile Singlet + Short Set",
+    "description": "A coordinated set featuring a comfortable singlet and matching shorts. Perfect for gym sessions, outdoor activities, or casual wear. Made from high-performance, quick-dry fabric.",
+    "price": 16800,
+    "originalPrice": null,
+    "category": "Sets",
+    "subcategory": "singlet-short-set",
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "colors": [
+      {
+        "name": "Forest Green",
+        "hex": "#166534",
+        "images": {
+          "front": "/images/cecile-set-green-front.jpg",
+          "back": "/images/cecile-set-green-back.jpg",
+          "detail": "/images/cecile-set-green-detail.jpg"
+        }
+      },
+      {
+        "name": "Charcoal",
+        "hex": "#36454F",
+        "images": {
+          "front": "/images/cecile-set-charcoal-front.jpg",
+          "back": "/images/cecile-set-charcoal-back.jpg",
+          "detail": "/images/cecile-set-charcoal-detail.jpg"
+        }
+      },
+      {
+        "name": "Tan",
+        "hex": "#D2B48C",
+        "images": {
+          "front": "/images/cecile-set-tan-front.jpg",
+          "back": "/images/cecile-set-tan-back.jpg",
+          "detail": "/images/cecile-set-tan-detail.jpg"
+        }
+      }
+    ],
+    "images": {
+      "front": "/images/cecile-set-green-front.jpg",
+      "back": "/images/cecile-set-green-back.jpg",
+      "detail": "/images/cecile-set-green-detail.jpg"
+    },
+    "stock": {
+      "XS": 6,
+      "S": 11,
+      "M": 15,
+      "L": 12,
+      "XL": 8
+    },
+    "isNew": true,
+    "onSale": false,
+    "featured": false,
+    "rating": 4.9,
+    "reviewCount": 31,
+    "soldCount": 58,
+    "createdAt": "2024-01-12T09:15:00Z",
+    "updatedAt": "2024-01-12T09:15:00Z"
+  },
+  {
+    "id": "prod_4",
+    "name": "Theresa Singlet + Leggings Set",
+    "description": "A versatile two-piece set with a fitted singlet and high-waisted leggings. Ideal for yoga, pilates, or everyday wear. Features four-way stretch fabric and moisture-wicking technology.",
+    "price": 19500,
+    "originalPrice": null,
+    "category": "Sets",
+    "subcategory": "singlet-leggings-set",
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "colors": [
+      {
+        "name": "Navy",
+        "hex": "#1E3A8A",
+        "images": {
+          "front": "/images/theresa-set-navy-front.jpg",
+          "back": "/images/theresa-set-navy-back.jpg",
+          "detail": "/images/theresa-set-navy-detail.jpg"
+        }
+      },
+      {
+        "name": "Black",
+        "hex": "#000000",
+        "images": {
+          "front": "/images/theresa-set-black-front.jpg",
+          "back": "/images/theresa-set-black-back.jpg",
+          "detail": "/images/theresa-set-black-detail.jpg"
+        }
+      },
+      {
+        "name": "Brown",
+        "hex": "#8B4513",
+        "images": {
+          "front": "/images/theresa-set-brown-front.jpg",
+          "back": "/images/theresa-set-brown-back.jpg",
+          "detail": "/images/theresa-set-brown-detail.jpg"
+        }
+      }
+    ],
+    "images": {
+      "front": "/images/theresa-set-navy-front.jpg",
+      "back": "/images/theresa-set-navy-back.jpg",
+      "detail": "/images/theresa-set-navy-detail.jpg"
+    },
+    "stock": {
+      "XS": 4,
+      "S": 9,
+      "M": 13,
+      "L": 11,
+      "XL": 7
+    },
+    "isNew": false,
+    "onSale": false,
+    "featured": true,
+    "rating": 4.7,
+    "reviewCount": 27,
+    "soldCount": 41,
+    "createdAt": "2024-01-08T16:45:00Z",
+    "updatedAt": "2024-01-08T16:45:00Z"
+  },
+  {
+    "id": "prod_5",
+    "name": "Liza Jumpsuit",
+    "description": "A sophisticated one-piece jumpsuit that transitions seamlessly from workout to street style. Features a flattering silhouette with strategic seaming and premium stretch fabric.",
+    "price": 21000,
+    "originalPrice": 25000,
+    "category": "Sets",
+    "subcategory": "jumpsuit",
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "colors": [
+      {
+        "name": "Black",
+        "hex": "#000000",
+        "images": {
+          "front": "/images/liza-jumpsuit-black-front.jpg",
+          "back": "/images/liza-jumpsuit-black-back.jpg",
+          "detail": "/images/liza-jumpsuit-black-detail.jpg"
+        }
+      },
+      {
+        "name": "Sage",
+        "hex": "#9CAF88",
+        "images": {
+          "front": "/images/liza-jumpsuit-sage-front.jpg",
+          "back": "/images/liza-jumpsuit-sage-back.jpg",
+          "detail": "/images/liza-jumpsuit-sage-detail.jpg"
+        }
+      }
+    ],
+    "images": {
+      "front": "/images/liza-jumpsuit-black-front.jpg",
+      "back": "/images/liza-jumpsuit-black-back.jpg",
+      "detail": "/images/liza-jumpsuit-black-detail.jpg"
+    },
+    "stock": {
+      "XS": 2,
+      "S": 5,
+      "M": 8,
+      "L": 6,
+      "XL": 3
+    },
+    "isNew": false,
+    "onSale": true,
+    "featured": false,
+    "rating": 4.5,
+    "reviewCount": 12,
+    "soldCount": 23,
+    "createdAt": "2024-01-05T11:20:00Z",
+    "updatedAt": "2024-01-05T11:20:00Z"
+  },
+  {
+    "id": "prod_6",
+    "name": "Maria Jacket + Short Set",
+    "description": "A stylish jacket and shorts combo perfect for cooler days or layering. The jacket features a zip-up design with thumb holes, while the shorts offer a comfortable fit with side pockets.",
+    "price": 23500,
+    "originalPrice": null,
+    "category": "Sets",
+    "subcategory": "jacket-short-set",
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "colors": [
+      {
+        "name": "Olive",
+        "hex": "#6B7739",
+        "images": {
+          "front": "/images/maria-set-olive-front.jpg",
+          "back": "/images/maria-set-olive-back.jpg",
+          "detail": "/images/maria-set-olive-detail.jpg"
+        }
+      },
+      {
+        "name": "Navy",
+        "hex": "#1E3A8A",
+        "images": {
+          "front": "/images/maria-set-navy-front.jpg",
+          "back": "/images/maria-set-navy-back.jpg",
+          "detail": "/images/maria-set-navy-detail.jpg"
+        }
+      },
+      {
+        "name": "Charcoal",
+        "hex": "#36454F",
+        "images": {
+          "front": "/images/maria-set-charcoal-front.jpg",
+          "back": "/images/maria-set-charcoal-back.jpg",
+          "detail": "/images/maria-set-charcoal-detail.jpg"
+        }
+      }
+    ],
+    "images": {
+      "front": "/images/maria-set-olive-front.jpg",
+      "back": "/images/maria-set-olive-back.jpg",
+      "detail": "/images/maria-set-olive-detail.jpg"
+    },
+    "stock": {
+      "XS": 3,
+      "S": 7,
+      "M": 10,
+      "L": 8,
+      "XL": 5
+    },
+    "isNew": true,
+    "onSale": false,
+    "featured": false,
+    "rating": 4.8,
+    "reviewCount": 19,
+    "soldCount": 29,
+    "createdAt": "2024-01-14T13:10:00Z",
+    "updatedAt": "2024-01-14T13:10:00Z"
+  },
+  {
+    "id": "prod_7",
+    "name": "Monica Jacket + Leggings Set",
+    "description": "A complete outfit featuring a cropped jacket with side zippers and high-waisted leggings. Perfect for outdoor activities or casual outings. Made from weather-resistant, stretchy fabric.",
+    "price": 26800,
+    "originalPrice": null,
+    "category": "Sets",
+    "subcategory": "jacket-leggings-set",
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "colors": [
+      {
+        "name": "Black",
+        "hex": "#000000",
+        "images": {
+          "front": "/images/monica-set-black-front.jpg",
+          "back": "/images/monica-set-black-back.jpg",
+          "detail": "/images/monica-set-black-detail.jpg"
+        }
+      },
+      {
+        "name": "Forest Green",
+        "hex": "#166534",
+        "images": {
+          "front": "/images/monica-set-green-front.jpg",
+          "back": "/images/monica-set-green-back.jpg",
+          "detail": "/images/monica-set-green-detail.jpg"
+        }
+      },
+      {
+        "name": "Brown",
+        "hex": "#8B4513",
+        "images": {
+          "front": "/images/monica-set-brown-front.jpg",
+          "back": "/images/monica-set-brown-back.jpg",
+          "detail": "/images/monica-set-brown-detail.jpg"
+        }
+      }
+    ],
+    "images": {
+      "front": "/images/monica-set-black-front.jpg",
+      "back": "/images/monica-set-black-back.jpg",
+      "detail": "/images/monica-set-black-detail.jpg"
+    },
+    "stock": {
+      "XS": 4,
+      "S": 8,
+      "M": 12,
+      "L": 9,
+      "XL": 6
+    },
+    "isNew": false,
+    "onSale": false,
+    "featured": true,
+    "rating": 4.9,
+    "reviewCount": 35,
+    "soldCount": 67,
+    "createdAt": "2024-01-03T08:30:00Z",
+    "updatedAt": "2024-01-03T08:30:00Z"
+  },
+  {
+    "id": "prod_8",
+    "name": "Rita Long-Top + Leggings Set",
+    "description": "An elegant set featuring a long-line top with side slits and matching leggings. Perfect for yoga sessions or casual wear. The long top provides extra coverage while maintaining a stylish silhouette.",
+    "price": 20500,
+    "originalPrice": 24000,
+    "category": "Sets",
+    "subcategory": "long-top-leggings-set",
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "colors": [
+      {
+        "name": "Tan",
+        "hex": "#D2B48C",
+        "images": {
+          "front": "/images/rita-set-tan-front.jpg",
+          "back": "/images/rita-set-tan-back.jpg",
+          "detail": "/images/rita-set-tan-detail.jpg"
+        }
+      },
+      {
+        "name": "Sage",
+        "hex": "#9CAF88",
+        "images": {
+          "front": "/images/rita-set-sage-front.jpg",
+          "back": "/images/rita-set-sage-back.jpg",
+          "detail": "/images/rita-set-sage-detail.jpg"
+        }
+      },
+      {
+        "name": "Navy",
+        "hex": "#1E3A8A",
+        "images": {
+          "front": "/images/rita-set-navy-front.jpg",
+          "back": "/images/rita-set-navy-back.jpg",
+          "detail": "/images/rita-set-navy-detail.jpg"
+        }
+      }
+    ],
+    "images": {
+      "front": "/images/rita-set-tan-front.jpg",
+      "back": "/images/rita-set-tan-back.jpg",
+      "detail": "/images/rita-set-tan-detail.jpg"
+    },
+    "stock": {
+      "XS": 5,
+      "S": 9,
+      "M": 11,
+      "L": 8,
+      "XL": 4
+    },
+    "isNew": false,
+    "onSale": true,
+    "featured": false,
+    "rating": 4.6,
+    "reviewCount": 22,
+    "soldCount": 38,
+    "createdAt": "2024-01-07T15:45:00Z",
+    "updatedAt": "2024-01-07T15:45:00Z"
+  },
+  {
+    "id": "prod_9",
+    "name": "Lucy Long-Top + Shorts Set",
+    "description": "A comfortable and versatile set with a flowy long top and fitted shorts. The top features a relaxed fit that's perfect for layering, while the shorts provide a secure, flattering fit.",
+    "price": 17500,
+    "originalPrice": null,
+    "category": "Sets",
+    "subcategory": "long-top-shorts-set",
+    "sizes": ["XS", "S", "M", "L", "XL"],
+    "colors": [
+      {
+        "name": "Cream",
+        "hex": "#F5F5DC",
+        "images": {
+          "front": "/images/lucy-set-cream-front.jpg",
+          "back": "/images/lucy-set-cream-back.jpg",
+          "detail": "/images/lucy-set-cream-detail.jpg"
+        }
+      },
+      {
+        "name": "Olive",
+        "hex": "#6B7739",
+        "images": {
+          "front": "/images/lucy-set-olive-front.jpg",
+          "back": "/images/lucy-set-olive-back.jpg",
+          "detail": "/images/lucy-set-olive-detail.jpg"
+        }
+      },
+      {
+        "name": "Black",
+        "hex": "#000000",
+        "images": {
+          "front": "/images/lucy-set-black-front.jpg",
+          "back": "/images/lucy-set-black-back.jpg",
+          "detail": "/images/lucy-set-black-detail.jpg"
+        }
+      }
+    ],
+    "images": {
+      "front": "/images/lucy-set-cream-front.jpg",
+      "back": "/images/lucy-set-cream-back.jpg",
+      "detail": "/images/lucy-set-cream-detail.jpg"
+    },
+    "stock": {
+      "XS": 6,
+      "S": 10,
+      "M": 14,
+      "L": 11,
+      "XL": 7
+    },
+    "isNew": true,
+    "onSale": false,
+    "featured": false,
+    "rating": 4.7,
+    "reviewCount": 16,
+    "soldCount": 33,
+    "createdAt": "2024-01-13T12:00:00Z",
+    "updatedAt": "2024-01-13T12:00:00Z"
+  }
+] 

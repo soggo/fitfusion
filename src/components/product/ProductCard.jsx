@@ -111,7 +111,7 @@ const ProductCard = ({ product }) => {
       {/* Product Image with Overlay Navigation */}
       <Link to={productUrl} className="relative block">
         <div 
-          className="relative aspect-[5/6] bg-gray-100 overflow-hidden max-w-[420px] mx-auto"
+          className="relative aspect-[4/5] bg-gray-100 overflow-hidden"
           onMouseEnter={() => {
             setIsHovering(true);
             setCurrentImageIndex(1); // Show back view on hover

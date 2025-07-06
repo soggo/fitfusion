@@ -23,10 +23,10 @@ const ProductCard = ({ product }) => {
 
   // Template images array - ordered for proper cycling
   const templateImages = [
-    '/public/frontv.jpg',    // Index 0: Default front view
-    '/public/backv.jpg',     // Index 1: Back view
-    '/public/caro1.jpg',     // Index 2: Additional view 1
-    '/public/caro2.jpg'      // Index 3: Additional view 2
+    'frontv.jpg',    // Index 0: Default front view
+    'backv.jpg',     // Index 1: Back view
+    'caro1.jpg',     // Index 2: Additional view 1
+    'caro2.jpg'      // Index 3: Additional view 2
   ];
 
   // Function to get product images with fallback to template images

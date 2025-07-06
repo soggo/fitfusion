@@ -131,7 +131,7 @@ const Home = () => {
       
       {/* Featured Products */}
       <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
               Featured Collection
@@ -141,9 +141,11 @@ const Home = () => {
             </p>
           </div>
           
-          <div className="mt-12 grid grid-cols-1 gap-y-8 gap-x-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 xl:gap-x-4">
+          <div className="mt-12 grid grid-cols-1 gap-y-8 gap-x-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 xl:gap-x-4 max-w-full">
             {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <div className="min-w-[320px] flex-1">
+                <ProductCard key={product.id} product={product} />
+              </div>
             ))}
           </div>
           
@@ -161,7 +163,7 @@ const Home = () => {
       {/* New Arrivals */}
       {newProducts.length > 0 && (
         <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
               <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
                 New Arrivals
@@ -171,9 +173,11 @@ const Home = () => {
               </p>
             </div>
             
-            <div className="mt-12 grid grid-cols-1 gap-y-8 gap-x-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 xl:gap-x-4">
+            <div className="mt-12 grid grid-cols-1 gap-y-8 gap-x-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 xl:gap-x-4 max-w-full">
               {newProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <div className="min-w-[320px] flex-1">
+                  <ProductCard key={product.id} product={product} />
+                </div>
               ))}
             </div>
           </div>

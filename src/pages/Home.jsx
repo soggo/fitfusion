@@ -141,7 +141,7 @@ const Home = () => {
             </p>
           </div>
           
-          <div className="mt-12 grid grid-cols-1 gap-y-12 gap-x-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 xl:gap-x-12">
+          <div className="mt-12 grid grid-cols-1 gap-y-8 gap-x-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 xl:gap-x-4">
             {featuredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -171,7 +171,7 @@ const Home = () => {
               </p>
             </div>
             
-            <div className="mt-12 grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 xl:gap-x-12">
+            <div className="mt-12 grid grid-cols-1 gap-y-8 gap-x-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 xl:gap-x-4">
               {newProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

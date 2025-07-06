@@ -131,7 +131,7 @@ const Home = () => {
       
       {/* Featured Products */}
       <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-6">
           <div className="text-center">
             <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
               Featured Collection
@@ -141,7 +141,7 @@ const Home = () => {
             </p>
           </div>
           
-          <div className="mt-12 grid grid-cols-1 gap-y-12 gap-x-8 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+          <div className="mt-12 grid grid-cols-1 gap-y-16 gap-x-12 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-16">
             {featuredProducts.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -161,7 +161,7 @@ const Home = () => {
       {/* New Arrivals */}
       {newProducts.length > 0 && (
         <section className="py-16 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-6xl mx-auto px-2 sm:px-4 lg:px-6">
             <div className="text-center">
               <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
                 New Arrivals
@@ -171,7 +171,7 @@ const Home = () => {
               </p>
             </div>
             
-            <div className="mt-12 grid grid-cols-1 gap-y-10 gap-x-6 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8">
+            <div className="mt-12 grid grid-cols-1 gap-y-14 gap-x-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-14">
               {newProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}

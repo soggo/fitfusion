@@ -15,24 +15,24 @@ const Footer = () => {
     ],
     company: [
       { name: 'About Us', href: '/about' },
-      { name: 'Size Guide', href: '/size-guide' },
-      { name: 'Care Instructions', href: '/care' },
-      { name: 'Sustainability', href: '/sustainability' },
-      { name: 'Careers', href: '/careers' },
-      { name: 'Press', href: '/press' },
+      // { name: 'Size Guide', href: '/size-guide' },
+      // { name: 'Care Instructions', href: '/care' },
+      // { name: 'Sustainability', href: '/sustainability' },
+      // { name: 'Careers', href: '/careers' },
+      // { name: 'Press', href: '/press' },
     ],
     support: [
       { name: 'Contact Us', href: '/contact' },
       { name: 'FAQ', href: '/faq' },
       { name: 'Shipping Info', href: '/shipping' },
-      { name: 'Returns & Exchanges', href: '/returns' },
-      { name: 'Track Your Order', href: '/track' },
+      // { name: 'Returns & Exchanges', href: '/returns' },
+      // { name: 'Track Your Order', href: '/track' },
       { name: 'Customer Service', href: '/support' },
     ],
     legal: [
       { name: 'Privacy Policy', href: '/privacy' },
       { name: 'Terms of Service', href: '/terms' },
-      { name: 'Cookie Policy', href: '/cookies' },
+      // { name: 'Cookie Policy', href: '/cookies' },
       { name: 'Refund Policy', href: '/refund' },
     ],
   };
@@ -84,7 +84,7 @@ const Footer = () => {
                 </div>
                 <div className="flex items-center text-gray-300">
                   <MapPin className="h-5 w-5 mr-3" />
-                  <span>Lagos, Nigeria</span>
+                  <span>Worldwide</span>
                 </div>
               </div>
               

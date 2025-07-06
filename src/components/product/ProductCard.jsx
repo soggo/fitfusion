@@ -84,7 +84,7 @@ const ProductCard = ({ product }) => {
   const currentImage = isHovering ? productImages[currentImageIndex] : productImages[0];
   
   return (
-    <div className="group relative bg-white rounded-md overflow-hidden shadow-none hover:shadow-sm transition-shadow duration-300 p-0">
+    <div className="group relative bg-white rounded-none overflow-hidden shadow-none hover:shadow-sm transition-shadow duration-300 p-0 m-0">
       {/* Badges */}
       <div className="absolute top-2 left-2 z-10 flex flex-col space-y-1">
         {product.isNew && (
@@ -111,7 +111,7 @@ const ProductCard = ({ product }) => {
       {/* Product Image with Overlay Navigation */}
       <Link to={productUrl} className="relative block">
         <div 
-          className="relative aspect-[3/4] bg-gray-100 overflow-hidden"
+          className="relative aspect-[1/1.3] bg-gray-100 overflow-hidden p-0 m-0"
           onMouseEnter={() => {
             setIsHovering(true);
             setCurrentImageIndex(1); // Show back view on hover
@@ -125,7 +125,7 @@ const ProductCard = ({ product }) => {
             ref={imageRef}
             src={currentImage}
             alt={product.name}
-            className="w-full h-full object-cover object-center transition-opacity duration-300 m-0 p-0"
+            className="w-full h-full object-cover object-center transition-opacity duration-300 p-0 m-0"
             loading="lazy"
           />
           
@@ -182,7 +182,7 @@ const ProductCard = ({ product }) => {
       </Link>
       
       {/* Product Info */}
-      <div className="p-3 pt-2 pb-2">
+      <div className="p-2 pt-1 pb-1">
         {/* Color Swatches */}
         {product.colors.length > 1 && (
           <div className="flex space-x-1 mb-3">

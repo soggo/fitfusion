@@ -103,10 +103,17 @@ const Home = () => {
             </main>
           </div>
         </div>
-        <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
+                <div className="lg:absolute lg:inset-y-0 lg:right-0 lg:w-1/2">
+          {/* Mobile image */}
           <img
-            className="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full"
-            src="/hero-full.webp"
+            className="w-full h-auto object-contain lg:hidden"
+            src="/mobilehero.jpg"
+            alt="FitFusion Activewear"
+          />
+          {/* Desktop image */}
+          <img
+            className="hidden lg:block lg:w-full lg:h-full"
+            src="/hero-fotor-20250708231853.png"
             alt="FitFusion Activewear"
           />
         </div>

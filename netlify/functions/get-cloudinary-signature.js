@@ -37,24 +37,37 @@ exports.handler = async (event, context) => {
     // Generate timestamp
     const timestamp = Math.floor(Date.now() / 1000);
 
-    // Parameters to sign (these will be sent to Cloudinary)
-    const paramsToSign = {
-      folder,
-      timestamp,
-      resource_type: resourceType,
-    };
-
-    // Add public_id if fileName is provided
+    // Generate a unique public_id if fileName is provided
+    let publicId = null;
     if (fileName) {
-      const publicId = fileName.split('.')[0]; // Remove file extension
+      publicId = fileName.split('.')[0]; // Remove file extension
+    }
+
+    // Parameters to sign (these must match exactly what will be sent to Cloudinary)
+    // Note: Cloudinary requires parameters to be sorted alphabetically for signing
+    const paramsToSign = {};
+    
+    if (publicId) {
       paramsToSign.public_id = publicId;
     }
+    
+    paramsToSign.folder = folder;
+    paramsToSign.resource_type = resourceType;
+    paramsToSign.timestamp = timestamp;
 
     // Generate signature using API secret
     const signature = cloudinary.utils.api_sign_request(
       paramsToSign, 
       process.env.CLOUDINARY_API_SECRET
     );
+
+    // Debug logging
+    console.log('Signature generation:', {
+      paramsToSign,
+      signature,
+      timestamp,
+      publicId,
+    });
 
     // Return signature and upload parameters
     return {

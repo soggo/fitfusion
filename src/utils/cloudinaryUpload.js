@@ -38,9 +38,20 @@ export const uploadImageToCloudinary = async (file, folder = 'fitfusion_uploads'
     formData.append('folder', signatureData.folder);
     formData.append('resource_type', signatureData.resourceType);
 
+    // Add public_id if it was included in the signature
     if (signatureData.publicId) {
       formData.append('public_id', signatureData.publicId);
     }
+
+    // Debug logging
+    console.log('Upload parameters:', {
+      apiKey: signatureData.apiKey,
+      timestamp: signatureData.timestamp,
+      signature: signatureData.signature,
+      folder: signatureData.folder,
+      resourceType: signatureData.resourceType,
+      publicId: signatureData.publicId,
+    });
 
     const uploadResponse = await fetch(
       `https://api.cloudinary.com/v1_1/${signatureData.cloudName}/auto/upload`,

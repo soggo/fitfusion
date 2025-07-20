@@ -61,6 +61,13 @@ exports.handler = async (event, context) => {
       throw new Error('No file provided');
     }
 
+    // Get product_id and image_type from form fields
+    const product_id = fields.product_id && fields.product_id[0];
+    const image_type = fields.image_type && fields.image_type[0];
+    if (!product_id || !image_type) {
+      throw new Error('Missing product_id or image_type in form fields');
+    }
+
     const file = files.file[0];
     
     // Upload to Cloudinary
@@ -76,6 +83,36 @@ exports.handler = async (event, context) => {
       console.warn('Failed to cleanup temp file:', cleanupError);
     }
 
+    // Dynamically import the ESM Supabase client
+    const { supabase } = await import('./utils/supabase.js');
+
+    // Fetch current images object for the product
+    const { data: product, error: fetchError } = await supabase
+      .from('products')
+      .select('images')
+      .eq('id', product_id)
+      .single();
+    if (fetchError) {
+      throw new Error('Failed to fetch product images: ' + fetchError.message);
+    }
+    const currentImages = product?.images || {};
+
+    // Update the relevant key in the images object
+    currentImages[image_type] = {
+      url: uploadResult.secure_url,
+      public_id: uploadResult.public_id
+    };
+
+    // Save updated images object back to Supabase
+    const { data: updateData, error: updateError } = await supabase
+      .from('products')
+      .update({ images: currentImages })
+      .eq('id', product_id)
+      .select();
+    if (updateError) {
+      throw new Error('Failed to update product images: ' + updateError.message);
+    }
+
     return {
       statusCode: 200,
       headers: {
@@ -84,7 +121,8 @@ exports.handler = async (event, context) => {
       },
       body: JSON.stringify({ 
         url: uploadResult.secure_url,
-        public_id: uploadResult.public_id 
+        public_id: uploadResult.public_id,
+        db_update: updateData
       }),
     };
   } catch (error) {

@@ -13,6 +13,7 @@ import { toast } from 'react-hot-toast';
 import Button from '../ui/Button.jsx';
 import Input from '../ui/Input.jsx';
 import { uploadImageToCloudinary } from '../../utils/cloudinaryUpload.js';
+import { productService } from '../../services/productService.js';
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
@@ -33,29 +34,10 @@ const Categories = () => {
   const loadCategories = async () => {
     setLoading(true);
     try {
-      // Mock data - replace with API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setCategories([
-        {
-          id: 'tops',
-          name: 'Tops',
-          description: 'Stylish and comfortable activewear tops for every workout and occasion',
-          image_url: '/images/category-tops.jpg'
-        },
-        {
-          id: 'bottoms',
-          name: 'Bottoms',
-          description: 'High-performance bottoms for all your activities',
-          image_url: '/images/category-bottoms.jpg'
-        },
-        {
-          id: 'sets',
-          name: 'Sets',
-          description: 'Coordinated activewear sets for effortless style',
-          image_url: '/images/category-sets.jpg'
-        }
-      ]);
+      const categoriesData = await productService.getAllCategories();
+      setCategories(categoriesData);
     } catch (error) {
+      console.error('Failed to load categories:', error);
       toast.error('Failed to load categories');
     } finally {
       setLoading(false);
@@ -114,27 +96,31 @@ const Categories = () => {
 
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Generate slug from name
+      const slug = formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      
+      const categoryData = {
+        ...formData,
+        slug
+      };
       
       if (editingCategory) {
         // Update existing category
+        const updatedCategory = await productService.updateCategory(editingCategory.id, categoryData);
         setCategories(categories.map(cat => 
-          cat.id === editingCategory.id ? { ...formData, id: cat.id } : cat
+          cat.id === editingCategory.id ? updatedCategory : cat
         ));
         toast.success('Category updated successfully!');
       } else {
         // Add new category
-        const newCategory = {
-          ...formData,
-          id: `cat_${Date.now()}`
-        };
+        const newCategory = await productService.createCategory(categoryData);
         setCategories([...categories, newCategory]);
         toast.success('Category created successfully!');
       }
       
       resetForm();
     } catch (error) {
+      console.error('Failed to save category:', error);
       toast.error('Failed to save category');
     } finally {
       setLoading(false);

@@ -7,10 +7,7 @@ export const productService = {
       .from('products')
       .select(`
         *,
-        category:categories(*),
-        colors:product_colors(*),
-        images:product_images(*),
-        stock:product_stock(*)
+        category:categories(*)
       `)
       .order('created_at', { ascending: false });
     
@@ -27,10 +24,7 @@ export const productService = {
       .from('products')
       .select(`
         *,
-        category:categories(*),
-        colors:product_colors(*),
-        images:product_images(*),
-        stock:product_stock(*)
+        category:categories(*)
       `)
       .eq('id', id)
       .single();
@@ -48,9 +42,7 @@ export const productService = {
       .from('products')
       .select(`
         *,
-        category:categories(*),
-        colors:product_colors(*),
-        images:product_images(*)
+        category:categories(*)
       `)
       .eq('featured', true)
       .limit(8)
@@ -69,12 +61,9 @@ export const productService = {
       .from('products')
       .select(`
         *,
-        category:categories(*),
-        colors:product_colors(*),
-        images:product_images(*),
-        stock:product_stock(*)
+        category:categories(*)
       `)
-      .eq('category.slug', categorySlug)
+      .eq('categories.slug', categorySlug)
       .order('created_at', { ascending: false });
     
     if (error) {
@@ -104,9 +93,7 @@ export const productService = {
       .from('products')
       .select(`
         *,
-        category:categories(*),
-        colors:product_colors(*),
-        images:product_images(*)
+        category:categories(*)
       `)
       .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
       .order('created_at', { ascending: false });
@@ -118,20 +105,110 @@ export const productService = {
     return data || [];
   },
 
-  // Get product stock for a specific product, color, and size
-  async getProductStock(productId, colorId, size) {
+  // Create a new product
+  async createProduct(productData) {
     const { data, error } = await supabase
-      .from('product_stock')
-      .select('quantity')
-      .eq('product_id', productId)
-      .eq('color_id', colorId)
-      .eq('size', size)
+      .from('products')
+      .insert([productData])
+      .select()
       .single();
     
     if (error) {
-      console.error('Error fetching product stock:', error);
-      return { quantity: 0 };
+      console.error('Error creating product:', error);
+      throw error;
     }
-    return data || { quantity: 0 };
+    return data;
+  },
+
+  // Update an existing product
+  async updateProduct(id, productData) {
+    const { data, error } = await supabase
+      .from('products')
+      .update(productData)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error updating product:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  // Update product images
+  async updateProductImages(productId, images) {
+    const { data, error } = await supabase
+      .from('products')
+      .update({ images })
+      .eq('id', productId)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error updating product images:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  // Delete a product
+  async deleteProduct(id) {
+    const { data, error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', id);
+    
+    if (error) {
+      console.error('Error deleting product:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  // Get category by slug
+  async getCategoryBySlug(slug) {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .eq('slug', slug)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching category:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  // Create a new category
+  async createCategory(categoryData) {
+    const { data, error } = await supabase
+      .from('categories')
+      .insert([categoryData])
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error creating category:', error);
+      throw error;
+    }
+    return data;
+  },
+
+  // Update a category
+  async updateCategory(id, categoryData) {
+    const { data, error } = await supabase
+      .from('categories')
+      .update(categoryData)
+      .eq('id', id)
+      .select()
+      .single();
+    
+    if (error) {
+      console.error('Error updating category:', error);
+      throw error;
+    }
+    return data;
   }
 }; 

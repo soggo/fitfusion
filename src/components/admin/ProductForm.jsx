@@ -15,7 +15,8 @@ import { toast } from 'react-hot-toast';
 import Button from '../ui/Button.jsx';
 import Input from '../ui/Input.jsx';
 import Select from '../ui/Select.jsx';
-import { uploadImageToCloudinary } from '../../utils/cloudinaryUpload.js';
+import { uploadImageToCloudinary, uploadImageWithDatabase } from '../../utils/cloudinaryUpload.js';
+import { productService } from '../../services/productService.js';
 
 const ProductForm = () => {
   const navigate = useNavigate();
@@ -31,6 +32,7 @@ const ProductForm = () => {
   });
   const [colorStock, setColorStock] = useState({});
   const [uploadingImages, setUploadingImages] = useState({});
+  const [currentProductId, setCurrentProductId] = useState(null); // Track current product ID
 
   const {
     register,
@@ -64,58 +66,56 @@ const ProductForm = () => {
   }, [isEditing, id]);
 
   const loadCategories = async () => {
-    // Mock categories - replace with API call
-    setCategories([
-      { value: 'Tops', label: 'Tops' },
-      { value: 'Bottoms', label: 'Bottoms' },
-      { value: 'Sets', label: 'Sets' }
-    ]);
+    try {
+      const categoriesData = await productService.getAllCategories();
+      const categoryOptions = categoriesData.map(cat => ({
+        value: cat.id,
+        label: cat.name
+      }));
+      setCategories(categoryOptions);
+    } catch (error) {
+      console.error('Failed to load categories:', error);
+      // Fallback to mock categories
+      setCategories([
+        { value: 'tops', label: 'Tops' },
+        { value: 'bottoms', label: 'Bottoms' },
+        { value: 'sets', label: 'Sets' }
+      ]);
+    }
   };
 
   const loadProduct = async () => {
     setLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock product data - replace with API call
-    const mockProduct = {
-      name: 'Moana One-Shoulder Top',
-      description: 'A sleek and stylish one-shoulder activewear top perfect for yoga, pilates, or casual wear.',
-      price: 12500,
-      originalPrice: null,
-      category: 'Tops',
-      subcategory: 'one-shoulder',
-      sizes: ['XS', 'S', 'M', 'L', 'XL'],
-      stock: { XS: 5, S: 8, M: 12, L: 10, XL: 6 },
-      colorStock: { 'Black': 15 },
-      isNew: true,
-      onSale: false,
-      featured: true,
-      colors: [
-        {
-          name: 'Black',
-          hex: '#000000',
-          images: {
-            front: '/images/moana-top-black-front.jpg',
-            back: '/images/moana-top-black-back.jpg',
-            detail: '/images/moana-top-black-detail.jpg'
-          }
-        }
-      ]
-    };
-    
-    // Set form values
-    Object.keys(mockProduct).forEach(key => {
-      if (key !== 'colors') {
-        setValue(key, mockProduct[key]);
-      }
-    });
-    
-    setColors(mockProduct.colors || []);
-    setStock(mockProduct.stock || { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0 });
-    setColorStock(mockProduct.colorStock || {});
-    setLoading(false);
+    try {
+      const product = await productService.getProductById(id);
+      
+      // Set the current product ID for image uploads
+      setCurrentProductId(id);
+      
+      // Transform product data for form
+      const formData = {
+        name: product.name,
+        description: product.description || '',
+        price: (product.price / 100).toString(), // Convert from cents
+        originalPrice: product.original_price ? (product.original_price / 100).toString() : '',
+        category: product.category_id,
+        subcategory: product.subcategory || '',
+        isNew: product.is_new || false,
+        onSale: product.on_sale || false,
+        featured: product.featured || false
+      };
+      
+      reset(formData);
+      setColors(product.colors || []);
+      setStock(product.stock || { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0 });
+      setColorStock(product.colorStock || {});
+      
+    } catch (error) {
+      console.error('Failed to load product:', error);
+      toast.error('Failed to load product');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleImageUpload = async (event, colorIndex, imageType) => {
@@ -131,7 +131,18 @@ const ProductForm = () => {
     setUploadingImages(prev => ({ ...prev, [uploadKey]: true }));
 
     try {
-      const cloudinaryUrl = await uploadImageToCloudinary(file);
+      let cloudinaryUrl;
+      
+      // Use database-aware upload if we have a product ID (for existing products)
+      if (currentProductId) {
+        const result = await uploadImageWithDatabase(file, currentProductId, imageType);
+        cloudinaryUrl = result.url;
+        toast.success(`${imageType} image uploaded and saved to database!`);
+      } else {
+        // For new products, use simple upload (will be saved to DB when product is created)
+        cloudinaryUrl = await uploadImageToCloudinary(file);
+        toast.success(`${imageType} image uploaded successfully!`);
+      }
       
       const newColors = [...colors];
       if (!newColors[colorIndex]) {
@@ -140,7 +151,6 @@ const ProductForm = () => {
       newColors[colorIndex].images[imageType] = cloudinaryUrl;
       setColors(newColors);
       
-      toast.success(`${imageType} image uploaded successfully!`);
     } catch (error) {
       console.error('Image upload error:', error);
       toast.error(`Failed to upload ${imageType} image. Please try again.`);
@@ -196,19 +206,36 @@ const ProductForm = () => {
         return;
       }
       
+      // Prepare images object for the first color (as per your database schema)
+      const firstColorImages = colors[0]?.images || {};
+      
       const productData = {
         ...data,
         colors,
         stock,
         colorStock,
+        images: firstColorImages, // Store first color images in products.images field
         price: parseInt(data.price) * 100, // Convert to cents
-        originalPrice: data.originalPrice ? parseInt(data.originalPrice) * 100 : null
+        originalPrice: data.originalPrice ? parseInt(data.originalPrice) * 100 : null,
+        slug: data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
       };
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (isEditing) {
+        // Update existing product
+        await productService.updateProduct(currentProductId, productData);
+        toast.success('Product updated successfully!');
+      } else {
+        // Create new product
+        const newProduct = await productService.createProduct(productData);
+        setCurrentProductId(newProduct.id);
+        
+        toast.success('Product created successfully! You can now upload images that will be saved to the database.');
+        
+        // Don't navigate away immediately for new products so user can upload images
+        // navigate('/admin/products');
+        return;
+      }
       
-      toast.success(isEditing ? 'Product updated successfully!' : 'Product created successfully!');
       navigate('/admin/products');
       
     } catch (error) {

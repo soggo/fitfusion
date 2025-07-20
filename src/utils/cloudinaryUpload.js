@@ -75,6 +75,54 @@ export const uploadImageToCloudinary = async (file, folder = 'fitfusion_uploads'
 };
 
 /**
+ * Upload an image and save it to the database (products.images field)
+ * @param {File} file - The image file to upload
+ * @param {string} productId - The UUID of the product
+ * @param {string} imageType - The type of image (e.g., 'front', 'back', 'detail')
+ * @returns {Promise<Object>} - The upload result with Cloudinary URL and database update info
+ */
+export const uploadImageWithDatabase = async (file, productId, imageType) => {
+  try {
+    if (!file || !productId || !imageType) {
+      throw new Error('Missing required parameters: file, productId, or imageType');
+    }
+
+    if (!file.type.startsWith('image/')) {
+      throw new Error('File must be an image');
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('product_id', productId);
+    formData.append('image_type', imageType);
+
+    const response = await fetch('/.netlify/functions/upload-image', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      throw new Error(`Upload failed: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+    
+    if (result.error) {
+      throw new Error(result.error);
+    }
+
+    return {
+      url: result.url,
+      public_id: result.public_id,
+      db_update: result.db_update
+    };
+  } catch (error) {
+    console.error('Database-aware image upload error:', error);
+    throw new Error(`Failed to upload image with database save: ${error.message}`);
+  }
+};
+
+/**
  * Legacy base64 upload function (kept for backward compatibility)
  * @param {File} file - The image file to upload
  * @returns {Promise<string>} - The Cloudinary URL

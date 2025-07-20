@@ -1,7 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import useProductStore from '../../store/productStore.js';
-import { CATEGORIES, SIZES, PRODUCT_COLORS } from '../../utils/constants.js';
+import { SIZES, PRODUCT_COLORS } from '../../utils/constants.js';
 import { formatPrice } from '../../utils/helpers.js';
 import Button from '../ui/Button.jsx';
 
@@ -55,7 +55,9 @@ const ProductFilters = () => {
     filters.colors.length > 0 ||
     filters.priceRange.min > filterOptions.priceRange.min ||
     filters.priceRange.max < filterOptions.priceRange.max ||
-    filters.inStockOnly;
+    filters.inStockOnly ||
+    filters.isNew ||
+    filters.onSale;
   
   return (
     <div className="bg-white">
@@ -90,7 +92,7 @@ const ProductFilters = () => {
               />
               <span className="ml-2 text-sm text-gray-700">All Products</span>
             </label>
-            {Object.values(CATEGORIES).map((category) => (
+            {filterOptions.categories.map((category) => (
               <label key={category} className="flex items-center">
                 <input
                   type="radio"

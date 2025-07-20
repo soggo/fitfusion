@@ -18,6 +18,8 @@ const useProductStore = create((set, get) => ({
     colors: [],
     priceRange: { min: 0, max: 50000 },
     inStockOnly: false,
+    isNew: false,
+    onSale: false,
     search: ''
   },
   
@@ -134,6 +136,8 @@ const useProductStore = create((set, get) => ({
         colors: [],
         priceRange: { min: 0, max: 50000 },
         inStockOnly: false,
+        isNew: false,
+        onSale: false,
         search: ''
       },
       currentPage: 1
@@ -263,16 +267,17 @@ const useProductStore = create((set, get) => ({
   
   // Get unique filter options
   getFilterOptions: () => {
-    const { products } = get();
+    const { products, categories } = get();
     
     const sizes = [...new Set(products.flatMap(p => p.sizes))];
     const colors = [...new Set(products.flatMap(p => p.colors.map(c => c.name)))];
+    const availableCategories = [...new Set(products.map(p => p.category).filter(Boolean))];
     const priceRange = {
       min: Math.min(...products.map(p => p.price)),
       max: Math.max(...products.map(p => p.price))
     };
     
-    return { sizes, colors, priceRange };
+    return { sizes, colors, categories: availableCategories, priceRange };
   },
   
   // Admin actions (for product management)

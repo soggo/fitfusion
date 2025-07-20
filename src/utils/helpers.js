@@ -257,10 +257,21 @@ export const sortProducts = (products, sortBy) => {
 
 // Filter utilities
 export const filterProducts = (products, filters) => {
-  return products.filter(product => {
-    // Category filter
-    if (filters.category && filters.category !== 'all' && product.category !== filters.category) {
-      return false;
+  console.log('🔍 Filtering products:', { 
+    totalProducts: products.length, 
+    filters,
+    sampleProduct: products[0]?.category 
+  });
+  
+  const filtered = products.filter(product => {
+    // Category filter - handle case-insensitive matching
+    if (filters.category && filters.category !== 'all') {
+      const productCategory = product.category?.toLowerCase() || '';
+      const filterCategory = filters.category.toLowerCase();
+      console.log('📂 Category check:', { productCategory, filterCategory, match: productCategory === filterCategory });
+      if (productCategory !== filterCategory) {
+        return false;
+      }
     }
     
     // Size filter
@@ -291,8 +302,21 @@ export const filterProducts = (products, filters) => {
       return false;
     }
     
+    // New products filter
+    if (filters.isNew && !product.isNew) {
+      return false;
+    }
+    
+    // On sale filter
+    if (filters.onSale && !product.onSale) {
+      return false;
+    }
+    
     return true;
   });
+  
+  console.log('✅ Filtered results:', { filteredCount: filtered.length });
+  return filtered;
 };
 
 // Debounce utility

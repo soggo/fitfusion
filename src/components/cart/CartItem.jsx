@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import useCartStore from '../../store/cartStore.js';
-import { formatPrice, createProductSlug, isProductInStock } from '../../utils/helpers.js';
+import { formatPrice, createProductSlug, isProductInStock, getProductPrimaryImage } from '../../utils/helpers.js';
 import { ROUTES } from '../../utils/constants.js';
 
 const CartItem = ({ item }) => {
@@ -30,7 +30,7 @@ const CartItem = ({ item }) => {
       {/* Product Image */}
       <Link to={productUrl} className="flex-shrink-0">
         <img
-          src={item.selectedColor.images?.front || item.product.images.front}
+          src={item.selectedColor.images?.front || getProductPrimaryImage(item.product)}
           alt={item.product.name}
           className="w-16 h-20 object-cover rounded-md"
         />

@@ -15,8 +15,27 @@ const templateImages = [
 ];
 
 const getProductImages = (product) => {
-  // For now, always use template images (same as ProductCard)
-  // In production, this would check if product.images exist and fallback to templates
+  if (product.images && typeof product.images === 'object') {
+    // Convert database images object to array
+    const imageUrls = [];
+    
+    // Add images in preferred order
+    if (product.images.front) imageUrls.push(product.images.front);
+    if (product.images.back) imageUrls.push(product.images.back);
+    if (product.images.detail) imageUrls.push(product.images.detail);
+    
+    // Add any other images that might exist
+    Object.entries(product.images).forEach(([key, url]) => {
+      if (!['front', 'back', 'detail'].includes(key) && url) {
+        imageUrls.push(url);
+      }
+    });
+    
+    // Return database images if any exist, otherwise fall back to templates
+    return imageUrls.length > 0 ? imageUrls : templateImages;
+  }
+  
+  // Fallback to template images
   return templateImages;
 };
 

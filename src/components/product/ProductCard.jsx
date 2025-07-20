@@ -21,18 +21,37 @@ const ProductCard = ({ product }) => {
   const productSlug = createProductSlug(product.name, product.id);
   const productUrl = `${ROUTES.PRODUCT}/${productSlug}`;
 
-  // Template images array - ordered for proper cycling
+  // Template images array - fallback for products without images
   const templateImages = [
-    'frontv.jpg',    // Index 0: Default front view
-    'backv.jpg',     // Index 1: Back view
-    'caro1.jpg',     // Index 2: Additional view 1
-    'caro2.jpg'      // Index 3: Additional view 2
+    '/frontv.jpg',    // Index 0: Default front view
+    '/backv.jpg',     // Index 1: Back view
+    '/caro1.jpg',     // Index 2: Additional view 1
+    '/caro2.jpg'      // Index 3: Additional view 2
   ];
 
   // Function to get product images with fallback to template images
   const getProductImages = () => {
-    // For now, always use template images
-    // In production, this would check if product.images exist and fallback to templates
+    if (product.images && typeof product.images === 'object') {
+      // Convert database images object to array
+      const imageUrls = [];
+      
+      // Add images in preferred order
+      if (product.images.front) imageUrls.push(product.images.front);
+      if (product.images.back) imageUrls.push(product.images.back);
+      if (product.images.detail) imageUrls.push(product.images.detail);
+      
+      // Add any other images that might exist
+      Object.entries(product.images).forEach(([key, url]) => {
+        if (!['front', 'back', 'detail'].includes(key) && url) {
+          imageUrls.push(url);
+        }
+      });
+      
+      // Return database images if any exist, otherwise fall back to templates
+      return imageUrls.length > 0 ? imageUrls : templateImages;
+    }
+    
+    // Fallback to template images
     return templateImages;
   };
   

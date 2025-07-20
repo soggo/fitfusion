@@ -15,6 +15,23 @@ export const calculateDiscount = (originalPrice, salePrice) => {
   return Math.round(((originalPrice - salePrice) / originalPrice) * 100);
 };
 
+// Get primary image for a product with fallback
+export const getProductPrimaryImage = (product, fallbackImage = '/frontv.jpg') => {
+  if (product.images && typeof product.images === 'object') {
+    // Try to get images in preferred order
+    if (product.images.front) return product.images.front;
+    if (product.images.back) return product.images.back;
+    if (product.images.detail) return product.images.detail;
+    
+    // Get any available image
+    const availableImages = Object.values(product.images).filter(Boolean);
+    if (availableImages.length > 0) return availableImages[0];
+  }
+  
+  // Fallback to template image
+  return fallbackImage;
+};
+
 // LocalStorage utilities
 export const getFromStorage = (key) => {
   try {

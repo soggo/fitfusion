@@ -15,7 +15,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import useCartStore from '../store/cartStore.js';
-import { formatPrice, validateEmail, validatePhone, validateRequired } from '../utils/helpers.js';
+import { formatPrice, validateEmail, validatePhone, validateRequired, getProductPrimaryImage } from '../utils/helpers.js';
 import { 
   validateCardNumber, 
   validateExpiryDate, 
@@ -509,7 +509,7 @@ const Checkout = () => {
                 {items.map((item) => (
                   <div key={item.id} className="flex items-center space-x-3">
                     <img
-                      src={item.selectedColor.images?.front || item.product.images.front}
+                      src={item.selectedColor.images?.front || getProductPrimaryImage(item.product)}
                       alt={item.product.name}
                       className="w-12 h-16 object-cover rounded-md"
                     />

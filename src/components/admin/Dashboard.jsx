@@ -15,6 +15,7 @@ import {
 import { Link } from 'react-router-dom';
 import Button from '../ui/Button.jsx';
 import { supabase } from '../../lib/supabase.js';
+import { productService } from '../../services/productService.js';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -35,48 +36,58 @@ const Dashboard = () => {
   });
 
   useEffect(() => {
-    // Simulate loading data
+    // Load actual dashboard data
     const loadDashboardData = async () => {
       setLoading(true);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock data - replace with actual API calls
-      setStats({
-        totalProducts: 24,
-        totalOrders: 156,
-        totalRevenue: 2847500, // in cents
-        totalCustomers: 89,
-        lowStockProducts: 3,
-        featuredProducts: 8
-      });
+      try {
+        // Fetch actual product data from database
+        const products = await productService.getAllProducts();
+        
+        // Calculate statistics from real data
+        const totalProducts = products.length;
+        
+        // Calculate featured products
+        const featuredProducts = products.filter(product => product.featured).length;
+        
+        // Calculate low stock products (stock <= 5 for any size)
+        const lowStockProducts = products.filter(product => {
+          if (!product.stock || typeof product.stock !== 'object') return false;
+          
+          // Check if any size has stock <= 5
+          return Object.values(product.stock).some(qty => {
+            const stockQty = parseInt(qty) || 0;
+            return stockQty > 0 && stockQty <= 5;
+          });
+        }).length;
 
-      setRecentOrders([
-        {
-          id: 'ORD-001',
-          customer: 'Sarah Johnson',
-          amount: 18500,
-          status: 'pending',
-          date: '2024-01-15'
-        },
-        {
-          id: 'ORD-002',
-          customer: 'Mike Chen',
-          amount: 12500,
-          status: 'shipped',
-          date: '2024-01-14'
-        },
-        {
-          id: 'ORD-003',
-          customer: 'Emma Davis',
-          amount: 17500,
-          status: 'delivered',
-          date: '2024-01-13'
-        }
-      ]);
+        setStats({
+          totalProducts,
+          totalOrders: 0, // TODO: Implement when orders system is ready
+          totalRevenue: 0, // TODO: Implement when orders system is ready
+          totalCustomers: 0, // TODO: Implement when user system is ready
+          lowStockProducts,
+          featuredProducts
+        });
 
-      setLoading(false);
+        // Clear recent orders - no mock data
+        setRecentOrders([]);
+
+      } catch (error) {
+        console.error('Failed to load dashboard data:', error);
+        // Fallback to zero values on error
+        setStats({
+          totalProducts: 0,
+          totalOrders: 0,
+          totalRevenue: 0,
+          totalCustomers: 0,
+          lowStockProducts: 0,
+          featuredProducts: 0
+        });
+        setRecentOrders([]);
+      } finally {
+        setLoading(false);
+      }
     };
 
     loadDashboardData();
@@ -238,14 +249,25 @@ const Dashboard = () => {
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Low Stock Alert</h3>
-            <AlertTriangle className="h-5 w-5 text-yellow-500" />
+            {stats.lowStockProducts > 0 ? (
+              <AlertTriangle className="h-5 w-5 text-yellow-500" />
+            ) : (
+              <Package className="h-5 w-5 text-green-500" />
+            )}
           </div>
           <p className="text-gray-600 mb-4">
-            {stats.lowStockProducts} products are running low on stock
+            {stats.lowStockProducts > 0 
+              ? `${stats.lowStockProducts} products are running low on stock (≤5 items)`
+              : 'All products have adequate stock levels'
+            }
           </p>
-          <Link to="/admin/products?filter=low-stock">
-            <Button variant="outline" size="sm">
-              View Products
+          <Link to="/admin/products">
+            <Button 
+              variant={stats.lowStockProducts > 0 ? "default" : "outline"} 
+              size="sm"
+              className={stats.lowStockProducts > 0 ? "bg-yellow-500 hover:bg-yellow-600" : ""}
+            >
+              {stats.lowStockProducts > 0 ? 'Check Stock' : 'View Products'}
             </Button>
           </Link>
         </div>
@@ -335,52 +357,55 @@ const Dashboard = () => {
             </Link>
           </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Order ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
-                </th>
-                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th> */}
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {recentOrders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {order.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {order.customer}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {formatPrice(order.amount)}
-                  </td>
-                  {/* <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                      {order.status}
-                    </span>
-                  </td> */}
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {new Date(order.date).toLocaleDateString()}
-                  </td>
+        
+        {recentOrders.length === 0 ? (
+          <div className="px-6 py-12 text-center">
+            <ShoppingCart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No Orders Yet</h3>
+            <p className="text-gray-600">
+              Orders will appear here once customers start placing them.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Order ID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Customer
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Amount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Date
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {recentOrders.map((order) => (
+                  <tr key={order.id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {order.id}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {order.customer}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {formatPrice(order.amount)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(order.date).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

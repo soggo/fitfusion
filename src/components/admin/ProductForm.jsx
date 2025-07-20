@@ -27,6 +27,7 @@ const ProductForm = () => {
   const [categories, setCategories] = useState([]);
   const [colors, setColors] = useState([]);
   const [images, setImages] = useState([]);
+  const [customImageTypes, setCustomImageTypes] = useState({}); // Track custom image types per color
   const [stock, setStock] = useState({
     XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0
   });
@@ -111,6 +112,22 @@ const ProductForm = () => {
       setStock(product.stock || { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0 });
       setColorStock(product.colorstock || {}); // all lowercase from database
       
+      // Extract custom image types from existing product
+      const customTypes = {};
+      if (product.colors) {
+        product.colors.forEach((color, colorIndex) => {
+          if (color.images) {
+            const customImageTypes = Object.keys(color.images).filter(
+              type => !['front', 'back', 'detail'].includes(type)
+            );
+            if (customImageTypes.length > 0) {
+              customTypes[colorIndex] = customImageTypes;
+            }
+          }
+        });
+      }
+      setCustomImageTypes(customTypes);
+      
     } catch (error) {
       console.error('Failed to load product:', error);
       toast.error('Failed to load product');
@@ -162,6 +179,31 @@ const ProductForm = () => {
 
   const addColor = () => {
     setColors([...colors, { name: '', hex: '#000000', images: {} }]);
+  };
+
+  const addCustomImageType = (colorIndex) => {
+    const newType = prompt('Enter image type name (e.g., "side", "detail2", "lifestyle"):');
+    if (newType && newType.trim()) {
+      const cleanType = newType.trim().toLowerCase().replace(/\s+/g, '_');
+      setCustomImageTypes(prev => ({
+        ...prev,
+        [colorIndex]: [...(prev[colorIndex] || []), cleanType]
+      }));
+    }
+  };
+
+  const removeCustomImageType = (colorIndex, imageType) => {
+    setCustomImageTypes(prev => ({
+      ...prev,
+      [colorIndex]: (prev[colorIndex] || []).filter(type => type !== imageType)
+    }));
+    
+    // Also remove the image if it exists
+    const newColors = [...colors];
+    if (newColors[colorIndex]?.images[imageType]) {
+      delete newColors[colorIndex].images[imageType];
+      setColors(newColors);
+    }
   };
 
   const removeColor = (index) => {
@@ -509,18 +551,50 @@ const ProductForm = () => {
                 
                 {/* Image Upload */}
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Product Images
-                    {index > 0 && (
-                      <span className="text-xs text-gray-500 ml-2">(Detail view only for additional colors)</span>
-                    )}
-                  </label>
-                  <div className={`grid gap-4 ${index === 0 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1'}`}>
-                    {(index === 0 ? ['front', 'back', 'detail'] : ['detail']).map((imageType) => (
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Product Images
+                      {index > 0 && (
+                        <span className="text-xs text-gray-500 ml-2">(Detail view only for additional colors)</span>
+                      )}
+                    </label>
+                    <Button
+                      type="button"
+                      onClick={() => addCustomImageType(index)}
+                      variant="outline"
+                      size="sm"
+                      className="text-xs"
+                    >
+                      <Plus className="h-3 w-3 mr-1" />
+                      Add Image Type
+                    </Button>
+                  </div>
+                  <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                    {(() => {
+                      // Get default image types for this color
+                      const defaultTypes = index === 0 ? ['front', 'back', 'detail'] : ['detail'];
+                      // Get custom image types for this color
+                      const customTypes = customImageTypes[index] || [];
+                      // Combine all image types
+                      const allTypes = [...defaultTypes, ...customTypes];
+                      
+                      return allTypes.map((imageType) => (
                       <div key={imageType} className="space-y-2">
-                        <label className="block text-xs font-medium text-gray-700 uppercase">
-                          {imageType} View
-                        </label>
+                        <div className="flex items-center justify-between">
+                          <label className="block text-xs font-medium text-gray-700 uppercase">
+                            {imageType} View
+                          </label>
+                          {!['front', 'back', 'detail'].includes(imageType) && (
+                            <button
+                              type="button"
+                              onClick={() => removeCustomImageType(index, imageType)}
+                              className="text-red-500 hover:text-red-700 p-1"
+                              title="Remove image type"
+                            >
+                              <X className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
                         <div className="relative">
                           {color.images[imageType] ? (
                             <div className="relative">
@@ -564,7 +638,8 @@ const ProductForm = () => {
                           )}
                         </div>
                       </div>
-                    ))}
+                    ));
+                  })()}
                   </div>
                 </div>
               </div>

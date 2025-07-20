@@ -13,6 +13,8 @@ import { Link } from 'react-router-dom';
 import Button from '../ui/Button.jsx';
 import Input from '../ui/Input.jsx';
 import Select from '../ui/Select.jsx';
+import { productService } from '../../services/productService.js';
+import { formatPrice, getProductPrimaryImage } from '../../utils/helpers.js';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -28,59 +30,43 @@ const ProductList = () => {
   const loadProducts = async () => {
     setLoading(true);
     
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock data - replace with actual API call
-    const mockProducts = [
-      {
-        id: 'prod_1',
-        name: 'Moana One-Shoulder Top',
-        price: 12500,
-        category: 'Tops',
-        stock: 45,
-        featured: true,
-        isNew: true,
-        onSale: false,
-        rating: 4.8,
-        image: '/images/moana-top-black-front.jpg'
-      },
-      {
-        id: 'prod_2',
-        name: 'Claire Romper',
-        price: 18500,
-        category: 'Sets',
-        stock: 31,
-        featured: true,
-        isNew: false,
-        onSale: true,
-        rating: 4.6,
-        image: '/images/claire-romper-olive-front.jpg'
-      },
-      {
-        id: 'prod_3',
-        name: 'Cecile Singlet + Short Set',
-        price: 16500,
-        category: 'Sets',
-        stock: 28,
-        featured: false,
-        isNew: true,
-        onSale: false,
-        rating: 4.7,
-        image: '/images/cecile-set-black-front.jpg'
-      }
-    ];
-    
-    setProducts(mockProducts);
-    setLoading(false);
+    try {
+      // Fetch products from database
+      const productsData = await productService.getAllProducts();
+      
+      // Transform database data to match admin UI expectations
+      const transformedProducts = productsData.map(product => ({
+        id: product.id,
+        name: product.name,
+        price: product.price, // Already in cents
+        originalPrice: product.original_price,
+        category: product.category?.name || 'Uncategorized',
+        stock: calculateTotalStock(product.stock),
+        featured: product.featured,
+        isNew: product.is_new,
+        onSale: product.on_sale,
+        rating: product.rating || 0,
+        image: getProductPrimaryImage(product),
+        created_at: product.created_at,
+        updated_at: product.updated_at
+      }));
+      
+      setProducts(transformedProducts);
+    } catch (error) {
+      console.error('Failed to load products:', error);
+      // You could show an error toast here if needed
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const formatPrice = (priceInCents) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN'
-    }).format(priceInCents / 100);
+  // Helper function to calculate total stock from stock object
+  const calculateTotalStock = (stockObj) => {
+    if (!stockObj || typeof stockObj !== 'object') return 0;
+    return Object.values(stockObj).reduce((total, qty) => total + (parseInt(qty) || 0), 0);
   };
+
+
 
   const getStockStatus = (stock) => {
     if (stock === 0) return { text: 'Out of Stock', color: 'text-red-600' };

@@ -118,8 +118,11 @@ const Home = () => {
           />
           {/* Desktop image */}
           <img
-            className="hidden lg:block lg:w-full lg:h-full"
-            src="/hero-fotor-20250708231853.png"
+            // className="hidden lg:block lg:w-full lg:h-full object-cover"
+            className="hidden lg:block lg:w-full lg:h-full object-contain"
+            
+            style={{ objectPosition: '50% 25%' }}
+            src="/herofr.jpg"
             alt="FitFusion Activewear"
           />
         </div>

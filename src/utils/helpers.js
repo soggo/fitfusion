@@ -110,12 +110,49 @@ export const createProductSlug = (name, id) => {
     .replace(/-+/g, '-')
     .trim('-');
   
-  return `${slug}-${id}`;
+  // Use a separator that won't conflict with UUIDs
+  return `${slug}--${id}`;
 };
 
 export const extractIdFromSlug = (slug) => {
-  const parts = slug.split('-');
-  return parts[parts.length - 1];
+  console.log('🔍 Extracting ID from slug:', slug);
+  
+  // Look for the UUID pattern after the double dash separator
+  const parts = slug.split('--');
+  if (parts.length >= 2) {
+    const extractedId = parts[parts.length - 1];
+    console.log('✅ Extracted ID using double dash:', extractedId);
+    return extractedId;
+  }
+  
+  // Fallback: look for UUID pattern in the slug
+  const uuidPattern = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+  const match = slug.match(uuidPattern);
+  if (match) {
+    console.log('✅ Extracted ID using UUID pattern:', match[0]);
+    return match[0];
+  }
+  
+  // Last resort: take everything after the last dash (for backward compatibility)
+  const dashParts = slug.split('-');
+  const fallbackId = dashParts[dashParts.length - 1];
+  console.log('⚠️ Using fallback ID extraction:', fallbackId);
+  return fallbackId;
+};
+
+// Category utilities
+export const createCategorySlug = (name) => {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with dashes
+    .replace(/-+/g, '-') // Replace multiple dashes with single dash
+    .replace(/^-+|-+$/g, ''); // Remove leading/trailing dashes
+};
+
+export const categoryNameToSlug = (categoryName) => {
+  if (!categoryName) return '';
+  return createCategorySlug(categoryName);
 };
 
 // Form validation utilities

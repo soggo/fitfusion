@@ -4,6 +4,7 @@ import AdminLayout from '../components/admin/AdminLayout.jsx';
 import Dashboard from '../components/admin/Dashboard.jsx';
 import ProductList from '../components/admin/ProductList.jsx';
 import ProductForm from '../components/admin/ProductForm.jsx';
+import ProductDetail from '../pages/ProductDetail.jsx';
 import { DataMigration } from '../components/admin/DataMigration.jsx';
 import Categories from '../components/admin/Categories.jsx';
 
@@ -15,6 +16,7 @@ const Admin = () => {
         <Route path="/products" element={<ProductList />} />
         <Route path="/products/new" element={<ProductForm />} />
         <Route path="/products/:id/edit" element={<ProductForm />} />
+        <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/migration" element={<DataMigration />} />
         
         {/* Placeholder routes for future features */}

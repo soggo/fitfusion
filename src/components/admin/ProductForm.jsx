@@ -109,7 +109,7 @@ const ProductForm = () => {
       reset(formData);
       setColors(product.colors || []);
       setStock(product.stock || { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0 });
-      setColorStock(product.colorStock || {});
+      setColorStock(product.color_stock || {}); // snake_case from database
       
     } catch (error) {
       console.error('Failed to load product:', error);
@@ -222,7 +222,7 @@ const ProductForm = () => {
         sizes: Array.isArray(data.sizes) ? data.sizes : [],
         colors,
         stock,
-        colorStock,
+        color_stock: colorStock, // snake_case for database
         images: firstColorImages, // Store first color images in products.images field
         is_new: data.isNew || false,
         on_sale: data.onSale || false,

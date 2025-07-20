@@ -99,8 +99,11 @@ const Categories = () => {
       // Generate slug from name
       const slug = formData.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
       
+      // Map form data to database column names (snake_case)
       const categoryData = {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
+        image_url: formData.image_url,
         slug
       };
       

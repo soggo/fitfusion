@@ -63,7 +63,7 @@ export const productService = {
         *,
         category:categories(*)
       `)
-      .eq('categories.slug', categorySlug)
+      .eq('category.slug', categorySlug)
       .order('created_at', { ascending: false });
     
     if (error) {

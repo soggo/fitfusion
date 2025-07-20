@@ -1,15 +1,15 @@
 import { create } from 'zustand';
-import productsData from '../data/products.json';
-import categoriesData from '../data/categories.json';
+import { productService } from '../services/productService.js';
 import { searchProducts, sortProducts, filterProducts } from '../utils/helpers.js';
 
 const useProductStore = create((set, get) => ({
   // State
-  products: productsData,
-  categories: categoriesData,
-  filteredProducts: productsData,
-  loading: false,
+  products: [],
+  categories: [],
+  filteredProducts: [],
+  loading: true,
   error: null,
+  initialized: false,
   
   // Filters
   filters: {
@@ -27,6 +27,79 @@ const useProductStore = create((set, get) => ({
   // Pagination
   currentPage: 1,
   itemsPerPage: 12,
+
+  // Initialize data from database
+  initializeData: async () => {
+    const { initialized } = get();
+    if (initialized) return;
+
+    set({ loading: true, error: null });
+    
+    try {
+      // Fetch data from database
+      const [productsData, categoriesData] = await Promise.all([
+        productService.getAllProducts(),
+        productService.getAllCategories()
+      ]);
+
+      // Transform database data to match UI expectations
+      const transformedProducts = productsData.map(product => ({
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        price: product.price, // Already in cents
+        originalPrice: product.original_price,
+        category: product.category?.name || 'Uncategorized',
+        subcategory: product.subcategory,
+        sizes: product.sizes || [],
+        colors: product.colors || [{ name: 'Default', hex: '#000000' }],
+        images: product.images || {},
+        stock: product.stock || {},
+        isNew: product.is_new || false,
+        onSale: product.on_sale || false,
+        featured: product.featured || false,
+        rating: product.rating || 0,
+        reviewCount: product.review_count || 0,
+        soldCount: product.sold_count || 0,
+        createdAt: product.created_at,
+        updatedAt: product.updated_at
+      }));
+
+      const transformedCategories = categoriesData.map(category => ({
+        id: category.id,
+        name: category.name,
+        slug: category.slug,
+        description: category.description,
+        image: category.image_url
+      }));
+
+      // Update price range based on actual products
+      const prices = transformedProducts.map(p => p.price);
+      const minPrice = prices.length > 0 ? Math.min(...prices) : 0;
+      const maxPrice = prices.length > 0 ? Math.max(...prices) : 50000;
+
+      set({ 
+        products: transformedProducts,
+        categories: transformedCategories,
+        filteredProducts: transformedProducts,
+        loading: false,
+        initialized: true,
+        filters: {
+          ...get().filters,
+          priceRange: { min: minPrice, max: maxPrice }
+        }
+      });
+
+      // Apply any existing filters
+      get().applyFiltersAndSort();
+    } catch (error) {
+      console.error('Failed to initialize product data:', error);
+      set({ 
+        error: error.message || 'Failed to load products',
+        loading: false 
+      });
+    }
+  },
   
   // Actions
   setProducts: (products) => {

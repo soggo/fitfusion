@@ -45,6 +45,7 @@ exports.handler = async (event, context) => {
 
     // Parameters to sign (these must match exactly what will be sent to Cloudinary)
     // Note: Cloudinary requires parameters to be sorted alphabetically for signing
+    // resource_type is not included in the signature for uploads
     const paramsToSign = {};
     
     if (publicId) {
@@ -52,7 +53,6 @@ exports.handler = async (event, context) => {
     }
     
     paramsToSign.folder = folder;
-    paramsToSign.resource_type = resourceType;
     paramsToSign.timestamp = timestamp;
 
     // Generate signature using API secret
@@ -98,3 +98,4 @@ exports.handler = async (event, context) => {
     };
   }
 }; 
+

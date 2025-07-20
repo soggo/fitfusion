@@ -92,7 +92,7 @@ const ProductForm = () => {
       // Set the current product ID for image uploads
       setCurrentProductId(id);
       
-      // Transform product data for form
+      // Transform product data for form (snake_case -> camelCase)
       const formData = {
         name: product.name,
         description: product.description || '',
@@ -100,6 +100,7 @@ const ProductForm = () => {
         originalPrice: product.original_price ? (product.original_price / 100).toString() : '',
         category: product.category_id,
         subcategory: product.subcategory || '',
+        sizes: product.sizes || [],
         isNew: product.is_new || false,
         onSale: product.on_sale || false,
         featured: product.featured || false
@@ -209,15 +210,23 @@ const ProductForm = () => {
       // Prepare images object for the first color (as per your database schema)
       const firstColorImages = colors[0]?.images || {};
       
+      // Map form data to database column names (camelCase -> snake_case)
       const productData = {
-        ...data,
+        name: data.name,
+        slug: data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
+        description: data.description,
+        price: parseInt(data.price) * 100, // Convert to cents
+        original_price: data.originalPrice ? parseInt(data.originalPrice) * 100 : null,
+        category_id: data.category, // Form sends category, DB expects category_id
+        subcategory: data.subcategory,
+        sizes: Array.isArray(data.sizes) ? data.sizes : [],
         colors,
         stock,
         colorStock,
         images: firstColorImages, // Store first color images in products.images field
-        price: parseInt(data.price) * 100, // Convert to cents
-        originalPrice: data.originalPrice ? parseInt(data.originalPrice) * 100 : null,
-        slug: data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+        is_new: data.isNew || false,
+        on_sale: data.onSale || false,
+        featured: data.featured || false
       };
       
       if (isEditing) {

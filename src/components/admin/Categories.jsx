@@ -12,7 +12,7 @@ import {
 import { toast } from 'react-hot-toast';
 import Button from '../ui/Button.jsx';
 import Input from '../ui/Input.jsx';
-import { uploadImageToCloudinaryBase64 } from '../../utils/cloudinaryUpload.js';
+import { uploadImageToCloudinary } from '../../utils/cloudinaryUpload.js';
 
 const Categories = () => {
   const [categories, setCategories] = useState([]);
@@ -73,7 +73,7 @@ const Categories = () => {
 
     setUploadingImage(true);
     try {
-      const cloudinaryUrl = await uploadImageToCloudinaryBase64(file);
+      const cloudinaryUrl = await uploadImageToCloudinary(file);
       setFormData({
         ...formData,
         image_url: cloudinaryUrl

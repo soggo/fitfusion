@@ -15,7 +15,7 @@ import { toast } from 'react-hot-toast';
 import Button from '../ui/Button.jsx';
 import Input from '../ui/Input.jsx';
 import Select from '../ui/Select.jsx';
-import { uploadImageToCloudinaryBase64 } from '../../utils/cloudinaryUpload.js';
+import { uploadImageToCloudinary } from '../../utils/cloudinaryUpload.js';
 
 const ProductForm = () => {
   const navigate = useNavigate();
@@ -131,7 +131,7 @@ const ProductForm = () => {
     setUploadingImages(prev => ({ ...prev, [uploadKey]: true }));
 
     try {
-      const cloudinaryUrl = await uploadImageToCloudinaryBase64(file);
+      const cloudinaryUrl = await uploadImageToCloudinary(file);
       
       const newColors = [...colors];
       if (!newColors[colorIndex]) {

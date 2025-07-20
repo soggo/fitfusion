@@ -1,19 +1,29 @@
 import React from 'react';
-import Loading from '../components/common/Loading.jsx';
+import { Routes, Route } from 'react-router-dom';
+import AdminLayout from '../components/admin/AdminLayout.jsx';
+import Dashboard from '../components/admin/Dashboard.jsx';
+import ProductList from '../components/admin/ProductList.jsx';
+import ProductForm from '../components/admin/ProductForm.jsx';
+import { DataMigration } from '../components/admin/DataMigration.jsx';
 
 const Admin = () => {
   return (
-    <div className="min-h-screen bg-white py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Admin Dashboard</h1>
-          <p className="text-gray-600 mb-8">Admin Page - Coming Soon</p>
-          <div className="bg-gray-100 rounded-lg p-8">
-            <Loading text="Admin dashboard is under construction..." />
-          </div>
-        </div>
-      </div>
-    </div>
+    <AdminLayout>
+      <Routes>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/products" element={<ProductList />} />
+        <Route path="/products/new" element={<ProductForm />} />
+        <Route path="/products/:id/edit" element={<ProductForm />} />
+        <Route path="/migration" element={<DataMigration />} />
+        
+        {/* Placeholder routes for future features */}
+        <Route path="/categories" element={<div className="p-8 text-center text-gray-500">Categories management coming soon...</div>} />
+        <Route path="/orders" element={<div className="p-8 text-center text-gray-500">Orders management coming soon...</div>} />
+        <Route path="/analytics" element={<div className="p-8 text-center text-gray-500">Analytics coming soon...</div>} />
+        <Route path="/users" element={<div className="p-8 text-center text-gray-500">User management coming soon...</div>} />
+        <Route path="/settings" element={<div className="p-8 text-center text-gray-500">Settings coming soon...</div>} />
+      </Routes>
+    </AdminLayout>
   );
 };
 

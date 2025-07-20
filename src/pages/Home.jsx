@@ -1,13 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Star, Truck, Shield, RotateCcw } from 'lucide-react';
 import useProductStore from '../store/productStore.js';
 import { ROUTES } from '../utils/constants.js';
 import Button from '../components/ui/Button.jsx';
 import ProductCard from '../components/product/ProductCard.jsx';
+import Loading from '../components/common/Loading.jsx';
 
 const Home = () => {
-  const { getFeaturedProducts, getNewProducts } = useProductStore();
+  const { getFeaturedProducts, getNewProducts, initializeData, loading } = useProductStore();
+  
+  // Initialize data from database
+  useEffect(() => {
+    initializeData();
+  }, [initializeData]);
   
   const featuredProducts = getFeaturedProducts(8);
   const newProducts = getNewProducts(4);
@@ -148,27 +154,35 @@ const Home = () => {
             </p>
           </div>
           
-          <div className="mt-12 grid grid-cols-1 gap-y-8 gap-x-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 xl:gap-x-4 max-w-full">
-            {featuredProducts.map((product) => (
-              <div className="min-w-[320px] flex-1">
-                <ProductCard key={product.id} product={product} />
+          {loading ? (
+            <div className="mt-12 flex justify-center">
+              <Loading size="lg" text="Loading featured products..." />
+            </div>
+          ) : (
+            <>
+              <div className="mt-12 grid grid-cols-1 gap-y-8 gap-x-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 xl:gap-x-4 max-w-full">
+                {featuredProducts.map((product) => (
+                  <div key={product.id} className="min-w-[320px] flex-1">
+                    <ProductCard product={product} />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          
-          <div className="mt-12 text-center">
-            <Link to={ROUTES.SHOP}>
-              <Button variant="outline" size="lg">
-                View All Products
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-          </div>
+              
+              <div className="mt-12 text-center">
+                <Link to={ROUTES.SHOP}>
+                  <Button variant="outline" size="lg">
+                    View All Products
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              </div>
+            </>
+          )}
         </div>
       </section>
       
       {/* New Arrivals */}
-      {newProducts.length > 0 && (
+      {!loading && newProducts.length > 0 && (
         <section className="py-16 bg-white">
           <div className="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center">
@@ -182,8 +196,8 @@ const Home = () => {
             
             <div className="mt-12 grid grid-cols-1 gap-y-8 gap-x-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 xl:gap-x-4 max-w-full">
               {newProducts.map((product) => (
-                <div className="min-w-[320px] flex-1">
-                  <ProductCard key={product.id} product={product} />
+                <div key={product.id} className="min-w-[320px] flex-1">
+                  <ProductCard product={product} />
                 </div>
               ))}
             </div>

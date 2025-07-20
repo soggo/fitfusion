@@ -15,6 +15,7 @@ const Shop = () => {
   const {
     filteredProducts,
     loading,
+    error,
     filters,
     sortBy,
     setSortBy,
@@ -22,9 +23,15 @@ const Shop = () => {
     getPaginatedProducts,
     setCurrentPage,
     currentPage,
+    initializeData,
   } = useProductStore();
   
   const paginatedData = getPaginatedProducts();
+  
+  // Initialize data from database
+  useEffect(() => {
+    initializeData();
+  }, [initializeData]);
   
   // Handle URL parameters
   useEffect(() => {
@@ -67,6 +74,23 @@ const Shop = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loading size="lg" text="Loading products..." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-red-400 text-6xl mb-4">⚠️</div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Failed to Load Products</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <Button
+            onClick={() => window.location.reload()}
+          >
+            Try Again
+          </Button>
+        </div>
       </div>
     );
   }

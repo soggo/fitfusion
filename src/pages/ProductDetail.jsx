@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { extractIdFromSlug, formatPrice, isProductInStock } from '../utils/helpers.js';
 import useProductStore from '../store/productStore.js';
@@ -22,14 +22,28 @@ const getProductImages = (product) => {
 
 const ProductDetail = () => {
   const { slug } = useParams();
-  const { getProductById } = useProductStore();
+  const { getProductById, initializeData, loading } = useProductStore();
   const { addItem, openCart } = useCartStore();
   const productId = extractIdFromSlug(slug);
+  
+  // Initialize data from database
+  useEffect(() => {
+    initializeData();
+  }, [initializeData]);
+  
   const product = getProductById(productId);
 
   // Default to first color and no size selected
   const [selectedColor, setSelectedColor] = useState(product?.colors[0] || null);
   const [selectedSize, setSelectedSize] = useState('');
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loading size="lg" text="Loading product..." />
+      </div>
+    );
+  }
 
   if (!product) {
     return (

@@ -182,14 +182,14 @@ const ProductForm = () => {
   };
 
   const addCustomImageType = (colorIndex) => {
-    const newType = prompt('Enter image type name (e.g., "side", "detail2", "lifestyle"):');
-    if (newType && newType.trim()) {
-      const cleanType = newType.trim().toLowerCase().replace(/\s+/g, '_');
-      setCustomImageTypes(prev => ({
-        ...prev,
-        [colorIndex]: [...(prev[colorIndex] || []), cleanType]
-      }));
-    }
+    const existingTypes = customImageTypes[colorIndex] || [];
+    const nextNumber = existingTypes.length + 1;
+    const newType = `additional_${nextNumber}`;
+    
+    setCustomImageTypes(prev => ({
+      ...prev,
+      [colorIndex]: [...(prev[colorIndex] || []), newType]
+    }));
   };
 
   const removeCustomImageType = (colorIndex, imageType) => {
@@ -551,96 +551,191 @@ const ProductForm = () => {
                 
                 {/* Image Upload */}
                 <div className="mt-4">
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center justify-between mb-4">
                     <label className="block text-sm font-medium text-gray-700">
                       Product Images
                       {index > 0 && (
                         <span className="text-xs text-gray-500 ml-2">(Detail view only for additional colors)</span>
                       )}
                     </label>
-                    <Button
-                      type="button"
-                      onClick={() => addCustomImageType(index)}
-                      variant="outline"
-                      size="sm"
-                      className="text-xs"
-                    >
-                      <Plus className="h-3 w-3 mr-1" />
-                      Add Image Type
-                    </Button>
+                    {index === 0 && (
+                      <Button
+                        type="button"
+                        onClick={() => addCustomImageType(index)}
+                        variant="outline"
+                        size="sm"
+                        className="text-xs"
+                      >
+                        <Plus className="h-3 w-3 mr-1" />
+                        Add Image Slot
+                      </Button>
+                    )}
                   </div>
-                  <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                  
+                  {/* Default Images Grid */}
+                  <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 mb-6">
                     {(() => {
                       // Get default image types for this color
                       const defaultTypes = index === 0 ? ['front', 'back', 'detail'] : ['detail'];
-                      // Get custom image types for this color
-                      const customTypes = customImageTypes[index] || [];
-                      // Combine all image types
-                      const allTypes = [...defaultTypes, ...customTypes];
                       
-                      return allTypes.map((imageType) => (
-                      <div key={imageType} className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <label className="block text-xs font-medium text-gray-700 uppercase">
-                            {imageType} View
-                          </label>
-                          {!['front', 'back', 'detail'].includes(imageType) && (
+                      return defaultTypes.map((imageType) => (
+                        <div key={imageType} className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <label className="block text-xs font-medium text-gray-700 uppercase tracking-wide">
+                              {imageType} View
+                            </label>
+                          </div>
+                          <div className="relative group">
+                            {color.images[imageType] ? (
+                              <div className="relative">
+                                <img
+                                  src={color.images[imageType]}
+                                  alt={`${color.name} ${imageType}`}
+                                  className="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-sm group-hover:shadow-md transition-shadow"
+                                />
+                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all rounded-lg"></div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newColors = [...colors];
+                                    delete newColors[index].images[imageType];
+                                    setColors(newColors);
+                                  }}
+                                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                                <div className="absolute bottom-2 left-2 px-2 py-1 bg-black bg-opacity-50 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                                  Click to replace
+                                </div>
+                              </div>
+                            ) : (
+                              <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-all ${
+                                uploadingImages[`${index}-${imageType}`] ? 'pointer-events-none opacity-50' : ''
+                              }`}>
+                                {uploadingImages[`${index}-${imageType}`] ? (
+                                  <div className="flex flex-col items-center">
+                                    <Loader2 className="h-6 w-6 text-blue-500 animate-spin" />
+                                    <span className="text-xs text-blue-600 mt-1 font-medium">Uploading...</span>
+                                  </div>
+                                ) : (
+                                  <div className="flex flex-col items-center">
+                                    <Upload className="h-6 w-6 text-gray-400" />
+                                    <span className="text-xs text-gray-500 mt-1 font-medium">Upload {imageType}</span>
+                                    <span className="text-xs text-gray-400 mt-0.5">PNG, JPG up to 10MB</span>
+                                  </div>
+                                )}
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => handleImageUpload(e, index, imageType)}
+                                  className="hidden"
+                                  disabled={uploadingImages[`${index}-${imageType}`]}
+                                />
+                              </label>
+                            )}
+                            {/* Replace overlay for existing images */}
+                            {color.images[imageType] && (
+                              <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 hover:bg-opacity-20 rounded-lg cursor-pointer transition-all">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => handleImageUpload(e, index, imageType)}
+                                  className="hidden"
+                                  disabled={uploadingImages[`${index}-${imageType}`]}
+                                />
+                              </label>
+                            )}
+                          </div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+
+                  {/* Additional Images - seamlessly integrated */}
+                  {index === 0 && customImageTypes[index] && customImageTypes[index].length > 0 && (
+                    <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+                      {customImageTypes[index].map((imageType) => (
+                        <div key={imageType} className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            <label className="block text-xs font-medium text-gray-700 uppercase tracking-wide">
+                              {imageType.replace(/_/g, ' ')} View
+                            </label>
                             <button
                               type="button"
                               onClick={() => removeCustomImageType(index, imageType)}
-                              className="text-red-500 hover:text-red-700 p-1"
-                              title="Remove image type"
+                              className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded transition-colors"
+                              title="Remove image slot"
                             >
                               <X className="h-3 w-3" />
                             </button>
-                          )}
+                          </div>
+                          <div className="relative group">
+                            {color.images[imageType] ? (
+                              <div className="relative">
+                                <img
+                                  src={color.images[imageType]}
+                                  alt={`${color.name} ${imageType}`}
+                                  className="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-sm group-hover:shadow-md transition-shadow"
+                                />
+                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all rounded-lg"></div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const newColors = [...colors];
+                                    delete newColors[index].images[imageType];
+                                    setColors(newColors);
+                                  }}
+                                  className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                                >
+                                  <X className="h-3 w-3" />
+                                </button>
+                                <div className="absolute bottom-2 left-2 px-2 py-1 bg-black bg-opacity-50 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                                  Click to replace
+                                </div>
+                              </div>
+                            ) : (
+                              <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition-all ${
+                                uploadingImages[`${index}-${imageType}`] ? 'pointer-events-none opacity-50' : ''
+                              }`}>
+                                {uploadingImages[`${index}-${imageType}`] ? (
+                                  <div className="flex flex-col items-center">
+                                    <Loader2 className="h-6 w-6 text-gray-500 animate-spin" />
+                                    <span className="text-xs text-gray-600 mt-1 font-medium">Uploading...</span>
+                                  </div>
+                                ) : (
+                                  <div className="flex flex-col items-center">
+                                    <Upload className="h-6 w-6 text-gray-400" />
+                                    <span className="text-xs text-gray-500 mt-1 font-medium">Upload {imageType.replace(/_/g, ' ')}</span>
+                                    <span className="text-xs text-gray-400 mt-0.5">PNG, JPG up to 10MB</span>
+                                  </div>
+                                )}
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => handleImageUpload(e, index, imageType)}
+                                  className="hidden"
+                                  disabled={uploadingImages[`${index}-${imageType}`]}
+                                />
+                              </label>
+                            )}
+                            {/* Replace overlay for existing images */}
+                            {color.images[imageType] && (
+                              <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 hover:bg-opacity-20 rounded-lg cursor-pointer transition-all">
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => handleImageUpload(e, index, imageType)}
+                                  className="hidden"
+                                  disabled={uploadingImages[`${index}-${imageType}`]}
+                                />
+                              </label>
+                            )}
+                          </div>
                         </div>
-                        <div className="relative">
-                          {color.images[imageType] ? (
-                            <div className="relative">
-                              <img
-                                src={color.images[imageType]}
-                                alt={`${color.name} ${imageType}`}
-                                className="w-full h-32 object-cover rounded-lg border border-gray-200"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const newColors = [...colors];
-                                  delete newColors[index].images[imageType];
-                                  setColors(newColors);
-                                }}
-                                className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600"
-                              >
-                                <X className="h-3 w-3" />
-                              </button>
-                            </div>
-                          ) : (
-                            <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-gray-400 ${
-                              uploadingImages[`${index}-${imageType}`] ? 'pointer-events-none opacity-50' : ''
-                            }`}>
-                              {uploadingImages[`${index}-${imageType}`] ? (
-                                <Loader2 className="h-6 w-6 text-gray-400 animate-spin" />
-                              ) : (
-                                <Upload className="h-6 w-6 text-gray-400" />
-                              )}
-                              <span className="text-xs text-gray-500 mt-1">
-                                {uploadingImages[`${index}-${imageType}`] ? 'Uploading...' : `Upload ${imageType}`}
-                              </span>
-                              <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => handleImageUpload(e, index, imageType)}
-                                className="hidden"
-                                disabled={uploadingImages[`${index}-${imageType}`]}
-                              />
-                            </label>
-                          )}
-                        </div>
-                      </div>
-                    ));
-                  })()}
-                  </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

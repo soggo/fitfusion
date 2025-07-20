@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Upload, X, Eye, Loader2 } from 'lucide-react';
-import { uploadImageToCloudinary } from '../../utils/cloudinaryUpload.js';
+import { uploadImageToCloudinaryBase64 } from '../../utils/cloudinaryUpload.js';
 
 const ImageUpload = ({ 
   onImageUpload, 
@@ -41,7 +41,7 @@ const ImageUpload = ({
 
     setUploading(true);
     try {
-      const cloudinaryUrl = await uploadImageToCloudinary(file);
+      const cloudinaryUrl = await uploadImageToCloudinaryBase64(file);
       onImageUpload(cloudinaryUrl);
     } catch (error) {
       console.error(`Failed to upload ${imageType} image:`, error);

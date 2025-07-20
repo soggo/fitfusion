@@ -8,12 +8,14 @@ import {
   Plus, 
   Trash2,
   Eye,
-  Star
+  Star,
+  Loader2
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Button from '../ui/Button.jsx';
 import Input from '../ui/Input.jsx';
 import Select from '../ui/Select.jsx';
+import { uploadImageToCloudinary } from '../../utils/cloudinaryUpload.js';
 
 const ProductForm = () => {
   const navigate = useNavigate();
@@ -24,6 +26,11 @@ const ProductForm = () => {
   const [categories, setCategories] = useState([]);
   const [colors, setColors] = useState([]);
   const [images, setImages] = useState([]);
+  const [stock, setStock] = useState({
+    XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0
+  });
+  const [colorStock, setColorStock] = useState({});
+  const [uploadingImages, setUploadingImages] = useState({});
 
   const {
     register,
@@ -80,6 +87,8 @@ const ProductForm = () => {
       category: 'Tops',
       subcategory: 'one-shoulder',
       sizes: ['XS', 'S', 'M', 'L', 'XL'],
+      stock: { XS: 5, S: 8, M: 12, L: 10, XL: 6 },
+      colorStock: { 'Black': 15 },
       isNew: true,
       onSale: false,
       featured: true,
@@ -104,23 +113,39 @@ const ProductForm = () => {
     });
     
     setColors(mockProduct.colors || []);
+    setStock(mockProduct.stock || { XS: 0, S: 0, M: 0, L: 0, XL: 0, XXL: 0 });
+    setColorStock(mockProduct.colorStock || {});
     setLoading(false);
   };
 
-  const handleImageUpload = (event, colorIndex, imageType) => {
+  const handleImageUpload = async (event, colorIndex, imageType) => {
     const file = event.target.files[0];
-    if (file) {
-      // Simulate image upload - replace with actual upload logic
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const newColors = [...colors];
-        if (!newColors[colorIndex]) {
-          newColors[colorIndex] = { name: '', hex: '#000000', images: {} };
-        }
-        newColors[colorIndex].images[imageType] = e.target.result;
-        setColors(newColors);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select a valid image file');
+      return;
+    }
+
+    const uploadKey = `${colorIndex}-${imageType}`;
+    setUploadingImages(prev => ({ ...prev, [uploadKey]: true }));
+
+    try {
+      const cloudinaryUrl = await uploadImageToCloudinary(file);
+      
+      const newColors = [...colors];
+      if (!newColors[colorIndex]) {
+        newColors[colorIndex] = { name: '', hex: '#000000', images: {} };
+      }
+      newColors[colorIndex].images[imageType] = cloudinaryUrl;
+      setColors(newColors);
+      
+      toast.success(`${imageType} image uploaded successfully!`);
+    } catch (error) {
+      console.error('Image upload error:', error);
+      toast.error(`Failed to upload ${imageType} image. Please try again.`);
+    } finally {
+      setUploadingImages(prev => ({ ...prev, [uploadKey]: false }));
     }
   };
 
@@ -129,6 +154,12 @@ const ProductForm = () => {
   };
 
   const removeColor = (index) => {
+    const colorToRemove = colors[index];
+    if (colorToRemove && colorToRemove.name) {
+      const newColorStock = { ...colorStock };
+      delete newColorStock[colorToRemove.name];
+      setColorStock(newColorStock);
+    }
     setColors(colors.filter((_, i) => i !== index));
   };
 
@@ -136,6 +167,23 @@ const ProductForm = () => {
     const newColors = [...colors];
     newColors[index] = { ...newColors[index], [field]: value };
     setColors(newColors);
+  };
+
+  const handleSizeChange = (sizeValue, isChecked) => {
+    if (!isChecked) {
+      // If size is unchecked, set quantity to 0
+      setStock({
+        ...stock,
+        [sizeValue]: 0
+      });
+    }
+  };
+
+  const handleColorStockChange = (colorName, quantity) => {
+    setColorStock({
+      ...colorStock,
+      [colorName]: parseInt(quantity) || 0
+    });
   };
 
   const onSubmit = async (data) => {
@@ -151,6 +199,8 @@ const ProductForm = () => {
       const productData = {
         ...data,
         colors,
+        stock,
+        colorStock,
         price: parseInt(data.price) * 100, // Convert to cents
         originalPrice: data.originalPrice ? parseInt(data.originalPrice) * 100 : null
       };
@@ -284,19 +334,36 @@ const ProductForm = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Available Sizes
+                Available Sizes & Stock
               </label>
-              <div className="space-y-2">
+              <div className="space-y-3">
                 {sizeOptions.map((size) => (
-                  <label key={size.value} className="flex items-center">
-                    <input
-                      type="checkbox"
-                      value={size.value}
-                      {...register('sizes')}
-                      className="h-4 w-4 text-gray-900 focus:ring-gray-900 border-gray-300 rounded"
-                    />
-                    <span className="ml-2 text-sm text-gray-700">{size.label}</span>
-                  </label>
+                  <div key={size.value} className="flex items-center space-x-3">
+                    <label className="flex items-center min-w-[60px]">
+                      <input
+                        type="checkbox"
+                        value={size.value}
+                        {...register('sizes')}
+                        onChange={(e) => handleSizeChange(size.value, e.target.checked)}
+                        className="h-4 w-4 text-gray-900 focus:ring-gray-900 border-gray-300 rounded"
+                      />
+                      <span className="ml-2 text-sm font-medium text-gray-700">{size.label}</span>
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      <span className="text-xs text-gray-500">Qty:</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={stock[size.value] || 0}
+                        onChange={(e) => setStock({
+                          ...stock,
+                          [size.value]: parseInt(e.target.value) || 0
+                        })}
+                        className="w-16 h-8 px-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
                 ))}
               </div>
             </div>
@@ -339,12 +406,8 @@ const ProductForm = () => {
 
         {/* Colors and Images */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center justify-between mb-6">
+          <div className="mb-6">
             <h2 className="text-lg font-semibold text-gray-900">Colors & Images</h2>
-            <Button type="button" onClick={addColor} variant="outline" size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Color
-            </Button>
           </div>
           
           <div className="space-y-6">
@@ -393,15 +456,31 @@ const ProductForm = () => {
                       />
                     </div>
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Total Quantity
+                    </label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={colorStock[color.name] || 0}
+                      onChange={(e) => handleColorStockChange(color.name, e.target.value)}
+                      placeholder="0"
+                    />
+                  </div>
                 </div>
                 
                 {/* Image Upload */}
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Product Images
+                    {index > 0 && (
+                      <span className="text-xs text-gray-500 ml-2">(Detail view only for additional colors)</span>
+                    )}
                   </label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {['front', 'back', 'detail'].map((imageType) => (
+                  <div className={`grid gap-4 ${index === 0 ? 'grid-cols-1 md:grid-cols-3' : 'grid-cols-1'}`}>
+                    {(index === 0 ? ['front', 'back', 'detail'] : ['detail']).map((imageType) => (
                       <div key={imageType} className="space-y-2">
                         <label className="block text-xs font-medium text-gray-700 uppercase">
                           {imageType} View
@@ -427,14 +506,23 @@ const ProductForm = () => {
                               </button>
                             </div>
                           ) : (
-                            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-gray-400">
-                              <Upload className="h-6 w-6 text-gray-400" />
-                              <span className="text-xs text-gray-500 mt-1">Upload {imageType}</span>
+                            <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-gray-400 ${
+                              uploadingImages[`${index}-${imageType}`] ? 'pointer-events-none opacity-50' : ''
+                            }`}>
+                              {uploadingImages[`${index}-${imageType}`] ? (
+                                <Loader2 className="h-6 w-6 text-gray-400 animate-spin" />
+                              ) : (
+                                <Upload className="h-6 w-6 text-gray-400" />
+                              )}
+                              <span className="text-xs text-gray-500 mt-1">
+                                {uploadingImages[`${index}-${imageType}`] ? 'Uploading...' : `Upload ${imageType}`}
+                              </span>
                               <input
                                 type="file"
                                 accept="image/*"
                                 onChange={(e) => handleImageUpload(e, index, imageType)}
                                 className="hidden"
+                                disabled={uploadingImages[`${index}-${imageType}`]}
                               />
                             </label>
                           )}
@@ -445,6 +533,14 @@ const ProductForm = () => {
                 </div>
               </div>
             ))}
+          </div>
+          
+          {/* Add Color Button at Bottom */}
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <Button type="button" onClick={addColor} variant="outline" size="sm" className="w-full">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Another Color
+            </Button>
           </div>
         </div>
 

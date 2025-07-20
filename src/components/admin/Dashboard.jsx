@@ -7,10 +7,14 @@ import {
   DollarSign,
   Eye,
   Plus,
-  AlertTriangle
+  AlertTriangle,
+  Database,
+  CheckCircle,
+  XCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '../ui/Button.jsx';
+import { supabase } from '../../lib/supabase.js';
 
 const Dashboard = () => {
   const [stats, setStats] = useState({
@@ -24,6 +28,11 @@ const Dashboard = () => {
 
   const [recentOrders, setRecentOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [connectionTest, setConnectionTest] = useState({
+    status: 'idle', // 'idle', 'testing', 'success', 'error'
+    message: '',
+    details: null
+  });
 
   useEffect(() => {
     // Simulate loading data
@@ -78,6 +87,63 @@ const Dashboard = () => {
       style: 'currency',
       currency: 'NGN'
     }).format(priceInCents / 100);
+  };
+
+  const testSupabaseConnection = async () => {
+    setConnectionTest({
+      status: 'testing',
+      message: 'Testing connection...',
+      details: null
+    });
+
+    try {
+      // Test 1: Categories table
+      const { data: categories, error: categoriesError } = await supabase
+        .from('categories')
+        .select('*')
+        .limit(1);
+
+      if (categoriesError) {
+        throw new Error(`Categories table error: ${categoriesError.message}`);
+      }
+
+      // Test 2: Products table
+      const { data: products, error: productsError } = await supabase
+        .from('products')
+        .select('*')
+        .limit(1);
+
+      if (productsError) {
+        throw new Error(`Products table error: ${productsError.message}`);
+      }
+
+      // Test 3: RLS policies
+      const { data: publicData, error: publicError } = await supabase
+        .from('products')
+        .select('id, name, price')
+        .limit(5);
+
+      if (publicError) {
+        throw new Error(`RLS policy error: ${publicError.message}`);
+      }
+
+      setConnectionTest({
+        status: 'success',
+        message: '✅ Supabase connection successful!',
+        details: {
+          categories: categories.length,
+          products: products.length,
+          publicData: publicData.length
+        }
+      });
+
+    } catch (error) {
+      setConnectionTest({
+        status: 'error',
+        message: `❌ Connection failed: ${error.message}`,
+        details: null
+      });
+    }
   };
 
   // const getStatusColor = (status) => {
@@ -167,7 +233,7 @@ const Dashboard = () => {
       </div>
 
       {/* Alerts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Low Stock Alert */}
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center justify-between mb-4">
@@ -198,6 +264,62 @@ const Dashboard = () => {
               Manage Featured
             </Button>
           </Link>
+        </div>
+
+        {/* Supabase Connection Test */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Database Connection</h3>
+            {connectionTest.status === 'idle' && <Database className="h-5 w-5 text-gray-500" />}
+            {connectionTest.status === 'testing' && <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>}
+            {connectionTest.status === 'success' && <CheckCircle className="h-5 w-5 text-green-500" />}
+            {connectionTest.status === 'error' && <XCircle className="h-5 w-5 text-red-500" />}
+          </div>
+          
+          <div className="space-y-3">
+            {connectionTest.status === 'idle' && (
+              <p className="text-gray-600">
+                Test your Supabase database connection
+              </p>
+            )}
+            
+            {connectionTest.status === 'testing' && (
+              <p className="text-blue-600 font-medium">
+                {connectionTest.message}
+              </p>
+            )}
+            
+            {connectionTest.status === 'success' && (
+              <div className="space-y-2">
+                <p className="text-green-600 font-medium">
+                  {connectionTest.message}
+                </p>
+                {connectionTest.details && (
+                  <div className="text-sm text-gray-600 space-y-1">
+                    <p>• Categories: {connectionTest.details.categories} record(s)</p>
+                    <p>• Products: {connectionTest.details.products} record(s)</p>
+                    <p>• Public data: {connectionTest.details.publicData} record(s)</p>
+                  </div>
+                )}
+              </div>
+            )}
+            
+            {connectionTest.status === 'error' && (
+              <p className="text-red-600 font-medium">
+                {connectionTest.message}
+              </p>
+            )}
+            
+            <Button 
+              onClick={testSupabaseConnection}
+              disabled={connectionTest.status === 'testing'}
+              variant={connectionTest.status === 'success' ? 'outline' : 'default'}
+              size="sm"
+              className="w-full"
+            >
+              {connectionTest.status === 'testing' ? 'Testing...' : 'Test Connection'}
+            </Button>
+          </div>
         </div>
       </div>
 

@@ -5,6 +5,7 @@ import Dashboard from '../components/admin/Dashboard.jsx';
 import ProductList from '../components/admin/ProductList.jsx';
 import ProductForm from '../components/admin/ProductForm.jsx';
 import { DataMigration } from '../components/admin/DataMigration.jsx';
+import Categories from '../components/admin/Categories.jsx';
 
 const Admin = () => {
   return (
@@ -17,7 +18,7 @@ const Admin = () => {
         <Route path="/migration" element={<DataMigration />} />
         
         {/* Placeholder routes for future features */}
-        <Route path="/categories" element={<div className="p-8 text-center text-gray-500">Categories management coming soon...</div>} />
+        <Route path="/categories" element={<Categories />} />
         <Route path="/orders" element={<div className="p-8 text-center text-gray-500">Orders management coming soon...</div>} />
         <Route path="/analytics" element={<div className="p-8 text-center text-gray-500">Analytics coming soon...</div>} />
         <Route path="/users" element={<div className="p-8 text-center text-gray-500">User management coming soon...</div>} />

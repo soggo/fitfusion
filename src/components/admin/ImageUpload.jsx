@@ -1,14 +1,17 @@
 import React, { useState } from 'react';
-import { Upload, X, Eye } from 'lucide-react';
+import { Upload, X, Eye, Loader2 } from 'lucide-react';
+import { uploadImageToCloudinary } from '../../utils/cloudinaryUpload.js';
 
 const ImageUpload = ({ 
   onImageUpload, 
   onImageRemove, 
   images = {}, 
   colorName = '',
-  className = '' 
+  className = '',
+  imageType = '' // Add imageType prop for better error handling
 }) => {
   const [dragActive, setDragActive] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -30,13 +33,21 @@ const ImageUpload = ({
     }
   };
 
-  const handleFile = (file) => {
-    if (file.type.startsWith('image/')) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        onImageUpload(e.target.result);
-      };
-      reader.readAsDataURL(file);
+  const handleFile = async (file) => {
+    if (!file.type.startsWith('image/')) {
+      console.error('File is not an image');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const cloudinaryUrl = await uploadImageToCloudinary(file);
+      onImageUpload(cloudinaryUrl);
+    } catch (error) {
+      console.error(`Failed to upload ${imageType} image:`, error);
+      // You might want to show a toast notification here
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -92,7 +103,7 @@ const ImageUpload = ({
                   dragActive 
                     ? 'border-gray-400 bg-gray-50' 
                     : 'border-gray-300 hover:border-gray-400'
-                }`}
+                } ${uploading ? 'pointer-events-none opacity-50' : ''}`}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
                 onDragOver={handleDrag}
@@ -103,11 +114,22 @@ const ImageUpload = ({
                   accept="image/*"
                   onChange={handleFileInput}
                   className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  disabled={uploading}
                 />
                 <div className="space-y-2">
-                  <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                  {uploading ? (
+                    <Loader2 className="mx-auto h-8 w-8 text-gray-400 animate-spin" />
+                  ) : (
+                    <Upload className="mx-auto h-8 w-8 text-gray-400" />
+                  )}
                   <div className="text-sm text-gray-600">
-                    <span className="font-medium">Click to upload</span> or drag and drop
+                    {uploading ? (
+                      <span className="font-medium">Uploading...</span>
+                    ) : (
+                      <>
+                        <span className="font-medium">Click to upload</span> or drag and drop
+                      </>
+                    )}
                   </div>
                   <p className="text-xs text-gray-500">
                     PNG, JPG, GIF up to 10MB

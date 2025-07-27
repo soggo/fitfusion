@@ -26,6 +26,7 @@ const Categories = () => {
     image_url: ''
   });
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [dragActive, setDragActive] = useState(false);
 
   useEffect(() => {
     loadCategories();
@@ -66,6 +67,33 @@ const Categories = () => {
       toast.error('Failed to upload image. Please try again.');
     } finally {
       setUploadingImage(false);
+    }
+  };
+
+  // Drag and drop handlers
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      // Create a synthetic event to mimic file input change
+      const syntheticEvent = {
+        target: {
+          files: e.dataTransfer.files
+        }
+      };
+      handleImageUpload(syntheticEvent);
     }
   };
 
@@ -248,17 +276,39 @@ const Categories = () => {
                     </button>
                   </div>
                 ) : (
-                  <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-gray-400 ${
-                    uploadingImage ? 'pointer-events-none opacity-50' : ''
-                  }`}>
+                  <label 
+                    className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all ${
+                      uploadingImage ? 'pointer-events-none opacity-50' : ''
+                    } ${
+                      dragActive 
+                        ? 'border-blue-400 bg-blue-50' 
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                  >
                     {uploadingImage ? (
-                      <Loader2 className="h-6 w-6 text-gray-400 animate-spin" />
+                      <Loader2 className={`h-6 w-6 animate-spin ${dragActive ? 'text-blue-500' : 'text-gray-400'}`} />
                     ) : (
-                      <Upload className="h-6 w-6 text-gray-400" />
+                      <Upload className={`h-6 w-6 ${dragActive ? 'text-blue-500' : 'text-gray-400'}`} />
                     )}
-                    <span className="text-sm text-gray-500 mt-1">
-                      {uploadingImage ? 'Uploading...' : 'Upload cover image'}
+                    <span className={`text-sm mt-1 ${
+                      dragActive ? 'text-blue-600' : 'text-gray-500'
+                    }`}>
+                      {uploadingImage 
+                        ? 'Uploading...' 
+                        : dragActive 
+                          ? 'Drop image here' 
+                          : 'Upload cover image'
+                      }
                     </span>
+                    {dragActive && (
+                      <span className="text-xs text-blue-500 mt-1">
+                        Release to upload
+                      </span>
+                    )}
                     <input
                       type="file"
                       accept="image/*"

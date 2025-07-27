@@ -34,6 +34,7 @@ const ProductForm = () => {
   const [colorStock, setColorStock] = useState({});
   const [uploadingImages, setUploadingImages] = useState({});
   const [currentProductId, setCurrentProductId] = useState(null); // Track current product ID
+  const [dragStates, setDragStates] = useState({}); // Track drag states for each upload area
 
   const {
     register,
@@ -174,6 +175,38 @@ const ProductForm = () => {
       toast.error(`Failed to upload ${imageType} image. Please try again.`);
     } finally {
       setUploadingImages(prev => ({ ...prev, [uploadKey]: false }));
+    }
+  };
+
+  // Drag and drop handlers
+  const handleDrag = (e, colorIndex, imageType) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const dragKey = `${colorIndex}-${imageType}`;
+    
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragStates(prev => ({ ...prev, [dragKey]: true }));
+    } else if (e.type === "dragleave") {
+      setDragStates(prev => ({ ...prev, [dragKey]: false }));
+    }
+  };
+
+  const handleDrop = (e, colorIndex, imageType) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const dragKey = `${colorIndex}-${imageType}`;
+    setDragStates(prev => ({ ...prev, [dragKey]: false }));
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      // Create a synthetic event to mimic file input change
+      const syntheticEvent = {
+        target: {
+          files: e.dataTransfer.files
+        }
+      };
+      handleImageUpload(syntheticEvent, colorIndex, imageType);
     }
   };
 
@@ -695,9 +728,19 @@ const ProductForm = () => {
                                 </div>
                               </div>
                             ) : (
-                              <label className={`flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:border-gray-400 hover:bg-gray-50 transition-all ${
-                                uploadingImages[`${index}-${imageType}`] ? 'pointer-events-none opacity-50' : ''
-                              }`}>
+                              <label 
+                                className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all ${
+                                  uploadingImages[`${index}-${imageType}`] ? 'pointer-events-none opacity-50' : ''
+                                } ${
+                                  dragStates[`${index}-${imageType}`] 
+                                    ? 'border-blue-400 bg-blue-50' 
+                                    : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+                                }`}
+                                onDragEnter={(e) => handleDrag(e, index, imageType)}
+                                onDragLeave={(e) => handleDrag(e, index, imageType)}
+                                onDragOver={(e) => handleDrag(e, index, imageType)}
+                                onDrop={(e) => handleDrop(e, index, imageType)}
+                              >
                                 {uploadingImages[`${index}-${imageType}`] ? (
                                   <div className="flex flex-col items-center">
                                     <Loader2 className="h-6 w-6 text-gray-500 animate-spin" />
@@ -705,9 +748,25 @@ const ProductForm = () => {
                                   </div>
                                 ) : (
                                   <div className="flex flex-col items-center">
-                                    <Upload className="h-6 w-6 text-gray-400" />
-                                    <span className="text-xs text-gray-500 mt-1 font-medium">Upload {imageType.replace(/_/g, ' ')}</span>
-                                    <span className="text-xs text-gray-400 mt-0.5">PNG, JPG up to 10MB</span>
+                                    <Upload className={`h-6 w-6 ${
+                                      dragStates[`${index}-${imageType}`] ? 'text-blue-500' : 'text-gray-400'
+                                    }`} />
+                                    <span className={`text-xs mt-1 font-medium ${
+                                      dragStates[`${index}-${imageType}`] ? 'text-blue-600' : 'text-gray-500'
+                                    }`}>
+                                      {dragStates[`${index}-${imageType}`] 
+                                        ? 'Drop image here' 
+                                        : `Upload ${imageType.replace(/_/g, ' ')}`
+                                      }
+                                    </span>
+                                    <span className={`text-xs mt-0.5 ${
+                                      dragStates[`${index}-${imageType}`] ? 'text-blue-500' : 'text-gray-400'
+                                    }`}>
+                                      {dragStates[`${index}-${imageType}`] 
+                                        ? 'Release to upload' 
+                                        : 'Click or drag PNG, JPG up to 10MB'
+                                      }
+                                    </span>
                                   </div>
                                 )}
                                 <input
@@ -721,7 +780,23 @@ const ProductForm = () => {
                             )}
                             {/* Replace overlay for existing images */}
                             {color.images[imageType] && (
-                              <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 hover:bg-opacity-20 rounded-lg cursor-pointer transition-all">
+                              <label 
+                                className={`absolute inset-0 flex items-center justify-center rounded-lg cursor-pointer transition-all ${
+                                  dragStates[`${index}-${imageType}`]
+                                    ? 'bg-blue-500 bg-opacity-30'
+                                    : 'bg-black bg-opacity-0 hover:bg-opacity-20'
+                                }`}
+                                onDragEnter={(e) => handleDrag(e, index, imageType)}
+                                onDragLeave={(e) => handleDrag(e, index, imageType)}
+                                onDragOver={(e) => handleDrag(e, index, imageType)}
+                                onDrop={(e) => handleDrop(e, index, imageType)}
+                              >
+                                {dragStates[`${index}-${imageType}`] && (
+                                  <div className="text-white text-center">
+                                    <Upload className="h-8 w-8 mx-auto mb-2" />
+                                    <div className="text-sm font-medium">Drop to replace</div>
+                                  </div>
+                                )}
                                 <input
                                   type="file"
                                   accept="image/*"

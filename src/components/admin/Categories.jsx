@@ -71,12 +71,27 @@ const Categories = () => {
   };
 
   // Drag and drop handlers
-  const handleDrag = (e) => {
+  const handleDragEnter = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
+    setDragActive(true);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Only set drag state to false if leaving the actual container
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX;
+    const y = e.clientY;
+    
+    if (x < rect.left || x >= rect.right || y < rect.top || y >= rect.bottom) {
       setDragActive(false);
     }
   };
@@ -284,9 +299,9 @@ const Categories = () => {
                         ? 'border-blue-400 bg-blue-50' 
                         : 'border-gray-300 hover:border-gray-400'
                     }`}
-                    onDragEnter={handleDrag}
-                    onDragLeave={handleDrag}
-                    onDragOver={handleDrag}
+                    onDragEnter={handleDragEnter}
+                    onDragLeave={handleDragLeave}
+                    onDragOver={handleDragOver}
                     onDrop={handleDrop}
                   >
                     {uploadingImage ? (

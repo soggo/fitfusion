@@ -83,14 +83,16 @@ const ProductCard = ({ product }) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // If no size is selected, use the first available size
-    const sizeToUse = selectedSize || product.sizes[0];
-    
-    if (!isProductInStock(product, sizeToUse)) {
+    // Don't add to cart if no size is selected
+    if (!selectedSize) {
       return;
     }
     
-    addItem(product, sizeToUse, selectedColor, 1);
+    if (!isProductInStock(product, selectedSize)) {
+      return;
+    }
+    
+    addItem(product, selectedSize, selectedColor, 1);
   };
   
   const toggleWishlist = (e) => {
@@ -189,11 +191,11 @@ const ProductCard = ({ product }) => {
                 variant="primary"
                 size="sm"
                 onClick={handleAddToCart}
-                disabled={!isProductInStock(product)}
+                disabled={!selectedSize || !isProductInStock(product, selectedSize)}
                 className="bg-gray-900 hover:bg-gray-800 text-white border border-gray-900"
               >
                 <ShoppingBag className="h-4 w-4 mr-1" />
-                Add to Cart
+                {!selectedSize ? 'Select Size' : 'Add to Cart'}
               </Button>
             </div>
           </div>

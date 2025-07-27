@@ -10,6 +10,7 @@ import {
   Package
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
 import Button from '../ui/Button.jsx';
 import Input from '../ui/Input.jsx';
 import Select from '../ui/Select.jsx';
@@ -19,6 +20,7 @@ import { formatPrice, getProductPrimaryImage } from '../../utils/helpers.js';
 const ProductList = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [deletingProductId, setDeletingProductId] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -87,8 +89,26 @@ const ProductList = () => {
 
   const handleDeleteProduct = async (productId) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
-      // Simulate API call
-      setProducts(products.filter(p => p.id !== productId));
+      try {
+        setDeletingProductId(productId);
+        
+        // Delete from database
+        await productService.deleteProduct(productId);
+        
+        // Remove from local state only after successful deletion
+        setProducts(products.filter(p => p.id !== productId));
+        
+        // Show success notification
+        toast.success('Product deleted successfully!');
+        
+      } catch (error) {
+        console.error('Failed to delete product:', error);
+        
+        // Show error notification
+        toast.error('Failed to delete product. Please try again.');
+      } finally {
+        setDeletingProductId(null);
+      }
     }
   };
 
@@ -297,9 +317,14 @@ const ProductList = () => {
                           variant="outline" 
                           size="sm"
                           onClick={() => handleDeleteProduct(product.id)}
-                          className="text-red-600 hover:text-red-800"
+                          disabled={deletingProductId === product.id}
+                          className="text-red-600 hover:text-red-800 disabled:opacity-50"
                         >
-                          <Trash2 className="h-4 w-4" />
+                          {deletingProductId === product.id ? (
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
                         </Button>
                       </div>
                     </td>

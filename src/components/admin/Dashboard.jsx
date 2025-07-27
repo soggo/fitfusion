@@ -93,11 +93,13 @@ const Dashboard = () => {
     loadDashboardData();
   }, []);
 
-  const formatPrice = (priceInCents) => {
+  const formatPrice = (priceInNaira) => {
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
-      currency: 'NGN'
-    }).format(priceInCents / 100);
+      currency: 'NGN',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(priceInNaira);
   };
 
   const testSupabaseConnection = async () => {

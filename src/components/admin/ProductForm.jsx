@@ -98,8 +98,8 @@ const ProductForm = () => {
       const formData = {
         name: product.name,
         description: product.description || '',
-        price: (product.price / 100).toString(), // Convert from cents
-        originalPrice: product.original_price ? (product.original_price / 100).toString() : '',
+        price: product.price.toString(), // Price is already in naira
+        originalPrice: product.original_price ? product.original_price.toString() : '',
         category: product.category_id,
         subcategory: product.subcategory || '',
         sizes: product.sizes || [],
@@ -309,8 +309,8 @@ const ProductForm = () => {
         name: data.name,
         slug: data.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
         description: data.description,
-        price: parseInt(data.price) * 100, // Convert to cents
-        original_price: data.originalPrice ? parseInt(data.originalPrice) * 100 : null,
+        price: parseInt(data.price), // Price in naira
+        original_price: data.originalPrice ? parseInt(data.originalPrice) : null,
         category_id: data.category, // Form sends category, DB expects category_id
         subcategory: data.subcategory,
         sizes: Array.isArray(data.sizes) ? data.sizes : [],

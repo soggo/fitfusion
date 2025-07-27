@@ -266,13 +266,22 @@ const ProductForm = () => {
   };
 
   const handleSizeChange = (sizeValue, isChecked) => {
-    if (!isChecked) {
-      // If size is unchecked, set quantity to 0
+    const currentSizes = watch('sizes') || [];
+    let newSizes;
+    
+    if (isChecked) {
+      // Add size if not already present
+      newSizes = currentSizes.includes(sizeValue) ? currentSizes : [...currentSizes, sizeValue];
+    } else {
+      // Remove size and set quantity to 0
+      newSizes = currentSizes.filter(size => size !== sizeValue);
       setStock({
         ...stock,
         [sizeValue]: 0
       });
     }
+    
+    setValue('sizes', newSizes);
   };
 
   const handleColorStockChange = (colorName, quantity) => {
@@ -321,13 +330,7 @@ const ProductForm = () => {
       } else {
         // Create new product
         const newProduct = await productService.createProduct(productData);
-        setCurrentProductId(newProduct.id);
-        
-        toast.success('Product created successfully! You can now upload images that will be saved to the database.');
-        
-        // Don't navigate away immediately for new products so user can upload images
-        // navigate('/admin/products');
-        return;
+        toast.success('Product created successfully!');
       }
       
       navigate('/admin/products');
@@ -464,7 +467,7 @@ const ProductForm = () => {
                       <input
                         type="checkbox"
                         value={size.value}
-                        {...register('sizes')}
+                        checked={(watch('sizes') || []).includes(size.value)}
                         onChange={(e) => handleSizeChange(size.value, e.target.checked)}
                         className="h-4 w-4 text-gray-900 focus:ring-gray-900 border-gray-300 rounded"
                       />
@@ -480,7 +483,8 @@ const ProductForm = () => {
                           ...stock,
                           [size.value]: parseInt(e.target.value) || 0
                         })}
-                        className="w-16 h-8 px-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-gray-900 focus:border-transparent"
+                        disabled={!(watch('sizes') || []).includes(size.value)}
+                        className="w-16 h-8 px-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-gray-900 focus:border-transparent disabled:bg-gray-100 disabled:text-gray-400"
                         placeholder="0"
                       />
                     </div>
@@ -634,9 +638,10 @@ const ProductForm = () => {
                                 <img
                                   src={color.images[imageType]}
                                   alt={`${color.name} ${imageType}`}
-                                  className="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-sm group-hover:shadow-md transition-shadow"
+                                  className="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-sm"
                                 />
-                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all rounded-lg"></div>
+                                
+                                {/* Delete button - always visible on hover */}
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -648,6 +653,31 @@ const ProductForm = () => {
                                 >
                                   <X className="h-3 w-3" />
                                 </button>
+                                
+                                {/* Replace input overlay */}
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => handleImageUpload(e, index, imageType)}
+                                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                  disabled={uploadingImages[`${index}-${imageType}`]}
+                                  onDragEnter={(e) => handleDragEnter(e, index, imageType)}
+                                  onDragLeave={(e) => handleDragLeave(e, index, imageType)}
+                                  onDragOver={(e) => handleDragOver(e, index, imageType)}
+                                  onDrop={(e) => handleDrop(e, index, imageType)}
+                                />
+                                
+                                {/* Drag feedback */}
+                                {dragStates[`${index}-${imageType}`] && (
+                                  <div className="absolute inset-0 bg-blue-500 bg-opacity-30 rounded-lg flex items-center justify-center">
+                                    <div className="text-white text-center">
+                                      <Upload className="h-8 w-8 mx-auto mb-2" />
+                                      <div className="text-sm font-medium">Drop to replace</div>
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {/* Hover hint */}
                                 <div className="absolute bottom-2 left-2 px-2 py-1 bg-black bg-opacity-50 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity">
                                   Click to replace
                                 </div>
@@ -703,18 +733,6 @@ const ProductForm = () => {
                                 />
                               </label>
                             )}
-                            {/* Replace overlay for existing images */}
-                            {color.images[imageType] && (
-                              <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 hover:bg-opacity-20 rounded-lg cursor-pointer transition-all">
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={(e) => handleImageUpload(e, index, imageType)}
-                                  className="hidden"
-                                  disabled={uploadingImages[`${index}-${imageType}`]}
-                                />
-                              </label>
-                            )}
                           </div>
                         </div>
                       ));
@@ -745,9 +763,10 @@ const ProductForm = () => {
                                 <img
                                   src={color.images[imageType]}
                                   alt={`${color.name} ${imageType}`}
-                                  className="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-sm group-hover:shadow-md transition-shadow"
+                                  className="w-full h-32 object-cover rounded-lg border border-gray-200 shadow-sm"
                                 />
-                                <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-all rounded-lg"></div>
+                                
+                                {/* Delete button */}
                                 <button
                                   type="button"
                                   onClick={() => {
@@ -759,6 +778,31 @@ const ProductForm = () => {
                                 >
                                   <X className="h-3 w-3" />
                                 </button>
+                                
+                                {/* Replace input overlay */}
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) => handleImageUpload(e, index, imageType)}
+                                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                                  disabled={uploadingImages[`${index}-${imageType}`]}
+                                  onDragEnter={(e) => handleDragEnter(e, index, imageType)}
+                                  onDragLeave={(e) => handleDragLeave(e, index, imageType)}
+                                  onDragOver={(e) => handleDragOver(e, index, imageType)}
+                                  onDrop={(e) => handleDrop(e, index, imageType)}
+                                />
+                                
+                                {/* Drag feedback */}
+                                {dragStates[`${index}-${imageType}`] && (
+                                  <div className="absolute inset-0 bg-blue-500 bg-opacity-30 rounded-lg flex items-center justify-center">
+                                    <div className="text-white text-center">
+                                      <Upload className="h-8 w-8 mx-auto mb-2" />
+                                      <div className="text-sm font-medium">Drop to replace</div>
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                {/* Hover hint */}
                                 <div className="absolute bottom-2 left-2 px-2 py-1 bg-black bg-opacity-50 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity">
                                   Click to replace
                                 </div>
@@ -803,34 +847,6 @@ const ProductForm = () => {
                                         : 'Click or drag PNG, JPG up to 10MB'
                                       }
                                     </span>
-                                  </div>
-                                )}
-                                <input
-                                  type="file"
-                                  accept="image/*"
-                                  onChange={(e) => handleImageUpload(e, index, imageType)}
-                                  className="hidden"
-                                  disabled={uploadingImages[`${index}-${imageType}`]}
-                                />
-                              </label>
-                            )}
-                            {/* Replace overlay for existing images */}
-                            {color.images[imageType] && (
-                              <label 
-                                className={`absolute inset-0 flex items-center justify-center rounded-lg cursor-pointer transition-all ${
-                                  dragStates[`${index}-${imageType}`]
-                                    ? 'bg-blue-500 bg-opacity-30'
-                                    : 'bg-black bg-opacity-0 hover:bg-opacity-20'
-                                }`}
-                                onDragEnter={(e) => handleDragEnter(e, index, imageType)}
-                                onDragLeave={(e) => handleDragLeave(e, index, imageType)}
-                                onDragOver={(e) => handleDragOver(e, index, imageType)}
-                                onDrop={(e) => handleDrop(e, index, imageType)}
-                              >
-                                {dragStates[`${index}-${imageType}`] && (
-                                  <div className="text-white text-center">
-                                    <Upload className="h-8 w-8 mx-auto mb-2" />
-                                    <div className="text-sm font-medium">Drop to replace</div>
                                   </div>
                                 )}
                                 <input

@@ -113,4 +113,10 @@ export const ANIMATION_DURATION = {
   FAST: 150,
   NORMAL: 300,
   SLOW: 500
+};
+
+// WhatsApp Contact Information
+export const WHATSAPP_CONFIG = {
+  PHONE_NUMBER: '+2349060006223', // Business WhatsApp number
+  BUSINESS_NAME: 'FitFusion'
 }; 

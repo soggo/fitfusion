@@ -12,7 +12,8 @@ import {
   Lock,
   ArrowLeft,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  MessageCircle
 } from 'lucide-react';
 import useCartStore from '../store/cartStore.js';
 import { formatPrice, validateEmail, validatePhone, validateRequired, getProductPrimaryImage } from '../utils/helpers.js';
@@ -25,9 +26,11 @@ import {
   generateOrderNumber,
   validateNigerianPhone,
   formatCardNumber,
-  formatExpiryDate
+  formatExpiryDate,
+  createWhatsAppMessage,
+  openWhatsApp
 } from '../utils/checkoutHelpers.js';
-import { ROUTES } from '../utils/constants.js';
+import { ROUTES, WHATSAPP_CONFIG } from '../utils/constants.js';
 import Button from '../components/ui/Button.jsx';
 import Input from '../components/ui/Input.jsx';
 import Select from '../components/ui/Select.jsx';
@@ -152,6 +155,33 @@ const Checkout = () => {
 
   const handleContinueShopping = () => {
     navigate(ROUTES.SHOP);
+  };
+
+  const handleContinueWithWhatsApp = () => {
+    const formData = watchedValues;
+    
+    // Validate required shipping fields
+    if (!validateForm()) {
+      toast.error('Please fill in all required shipping information first.');
+      return;
+    }
+
+    // Create order totals
+    const orderTotals = {
+      subtotal,
+      shipping,
+      tax,
+      total
+    };
+
+    // Generate WhatsApp message
+    const message = createWhatsAppMessage(formData, items, orderTotals);
+    
+    // Open WhatsApp
+    openWhatsApp(message, WHATSAPP_CONFIG.PHONE_NUMBER);
+    
+    // Show success message
+    toast.success('Redirecting to WhatsApp...');
   };
 
   if (orderComplete) {
@@ -349,7 +379,17 @@ const Checkout = () => {
                     </div>
                   </div>
 
-                  <div className="mt-8 flex justify-end">
+                  <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-end">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={handleContinueWithWhatsApp}
+                      disabled={!validateForm()}
+                      className="flex items-center justify-center gap-2"
+                    >
+                      <MessageCircle className="h-4 w-4" />
+                      Continue with WhatsApp
+                    </Button>
                     <Button type="submit" disabled={!validateForm()}>
                       Continue to Payment
                     </Button>

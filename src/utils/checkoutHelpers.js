@@ -184,4 +184,49 @@ export const formatPhoneNumber = (phone) => {
   }
   
   return phone;
+};
+
+// Create WhatsApp message with order details
+export const createWhatsAppMessage = (formData, cartItems, totals) => {
+  const { firstName, lastName, email, phone } = formData;
+  
+  // Format cart items - use the same price formatting as the rest of the app
+  const itemsList = cartItems.map(item => {
+    const itemPrice = item.product.price * item.quantity;
+    const formattedPrice = new Intl.NumberFormat('en-NG', {
+      style: 'currency',
+      currency: 'NGN',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(itemPrice);
+    return `${item.product.name} (Size: ${item.selectedSize}) - Qty: ${item.quantity} - ${formattedPrice}`;
+  }).join('\n');
+  
+  // Format subtotal using the same formatting as the rest of the app
+  const formatPrice = (price) => new Intl.NumberFormat('en-NG', {
+    style: 'currency',
+    currency: 'NGN',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price);
+  
+  const message = `Hello, I want to order:
+
+*Customer Details:*
+Name: ${firstName} ${lastName}
+Email: ${email}
+Phone: ${phone}
+
+*Order Items:*
+${itemsList}
+
+*Subtotal: ${formatPrice(totals.subtotal)}*`;
+
+  return encodeURIComponent(message);
+};
+
+// Open WhatsApp with formatted message
+export const openWhatsApp = (message, phoneNumber) => {
+  const url = `https://wa.me/${phoneNumber.replace('+', '')}?text=${message}`;
+  window.open(url, '_blank');
 }; 

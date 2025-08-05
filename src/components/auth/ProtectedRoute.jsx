@@ -3,8 +3,10 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.jsx';
 
 const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, isAdmin } = useAuth();
   const location = useLocation();
+
+  console.log('ProtectedRoute - user:', user?.email, 'loading:', loading, 'isAdmin:', isAdmin?.());
 
   // Show loading spinner while checking authentication
   if (loading) {
@@ -23,7 +25,13 @@ const ProtectedRoute = ({ children }) => {
     return <Navigate to="/admin/login" state={{ from: location }} replace />;
   }
 
-  // If authenticated, render the protected component
+  // Check if user is admin for admin routes
+  if (location.pathname.startsWith('/admin') && !isAdmin()) {
+    console.log('User is not admin, redirecting to login');
+    return <Navigate to="/admin/login" state={{ from: location }} replace />;
+  }
+
+  // If authenticated and authorized, render the protected component
   return children;
 };
 

@@ -19,15 +19,21 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setUser(session?.user ?? null);
-      
-      // If user exists, fetch their profile
-      if (session?.user) {
-        await fetchUserProfile(session.user.id);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+        
+        // If user exists, fetch their profile
+        if (session?.user) {
+          await fetchUserProfile(session.user.id);
+        }
+      } catch (error) {
+        console.error('Error getting initial session:', error);
+        setUser(null);
+        setProfile(null);
+      } finally {
+        setLoading(false);
       }
-      
-      setLoading(false);
     };
 
     getInitialSession();
@@ -35,15 +41,23 @@ export const AuthProvider = ({ children }) => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setUser(session?.user ?? null);
+        console.log('Auth state change:', event, session?.user?.email);
         
-        if (session?.user) {
-          await fetchUserProfile(session.user.id);
-        } else {
+        try {
+          setUser(session?.user ?? null);
+          
+          if (session?.user) {
+            await fetchUserProfile(session.user.id);
+          } else {
+            setProfile(null);
+          }
+        } catch (error) {
+          console.error('Error handling auth state change:', error);
+          setUser(null);
           setProfile(null);
+        } finally {
+          setLoading(false);
         }
-        
-        setLoading(false);
       }
     );
 
@@ -101,9 +115,23 @@ export const AuthProvider = ({ children }) => {
 
   // Sign out
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    setProfile(null);
-    return { error };
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      // Clear all auth state immediately regardless of error
+      setUser(null);
+      setProfile(null);
+      setLoading(false);
+      
+      return { error };
+    } catch (error) {
+      // Still clear state even if there's an error
+      setUser(null);
+      setProfile(null);
+      setLoading(false);
+      
+      return { error };
+    }
   };
 
   // Update user profile

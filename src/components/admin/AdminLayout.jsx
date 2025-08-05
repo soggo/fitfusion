@@ -21,8 +21,18 @@ const AdminLayout = ({ children }) => {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { user, signOut, loading, isAdmin } = useAuth();
   const userMenuRef = useRef(null);
+
+  // Debug logging
+  useEffect(() => {
+    console.log('AdminLayout - Auth State:', {
+      user: user?.email,
+      loading,
+      isAdmin: isAdmin?.(),
+      pathname: location.pathname
+    });
+  }, [user, loading, isAdmin, location.pathname]);
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -57,19 +67,40 @@ const AdminLayout = ({ children }) => {
 
   const handleLogout = async () => {
     try {
+      console.log('Starting logout process...');
+      setShowUserMenu(false); // Close the menu immediately
+      
       const { error } = await signOut();
+      
+      // Always navigate to login, even if there's an error
+      // The signOut function now clears state regardless of error
+      navigate('/admin/login', { replace: true });
+      
       if (error) {
-        toast.error('Error signing out');
         console.error('Logout error:', error);
+        toast.error('Signed out (with minor error)');
       } else {
         toast.success('Logged out successfully');
-        navigate('/admin/login');
       }
     } catch (error) {
-      toast.error('Error signing out');
       console.error('Logout error:', error);
+      toast.error('Signed out (with error)');
+      // Still navigate away even if there's an error
+      navigate('/admin/login', { replace: true });
     }
   };
+
+  // Show a simplified loading state while auth is being resolved
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading admin panel...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">

@@ -311,7 +311,7 @@ const ProductDetail = () => {
             </Button>
 
             {/* Rating */}
-            {product.rating && (
+            {/* {product.rating && product.reviewCount > 0 && (
               <div className="flex items-center mb-4">
                 <div className="flex items-center">
                   {[...Array(5)].map((_, index) => (
@@ -332,7 +332,7 @@ const ProductDetail = () => {
                 </div>
                 <span className="text-xs text-gray-500 ml-2">({product.reviewCount} reviews)</span>
               </div>
-            )}
+            )} */}
 
             {/* Description */}
             <div className="mb-4">

@@ -272,7 +272,7 @@ const ProductCard = ({ product }) => {
         </div>
         
         {/* Rating - only show if there are reviews */}
-        {product.rating && product.reviewCount > 0 && (
+        {false && product.rating && product.reviewCount > 0 && (
           <div className="flex items-center mt-2">
             <div className="flex items-center">
               {[...Array(5)].map((_, index) => (

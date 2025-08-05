@@ -15,20 +15,36 @@ import Cart from './pages/Cart.jsx';
 import Checkout from './pages/Checkout.jsx';
 import Account from './pages/Account.jsx';
 import Admin from './pages/Admin.jsx';
+import AdminLogin from './pages/AdminLogin.jsx';
+
+// Auth Components
+import { AuthProvider } from './contexts/AuthContext.jsx';
+import ProtectedRoute from './components/auth/ProtectedRoute.jsx';
+import CustomerProtectedRoute from './components/auth/CustomerProtectedRoute.jsx';
 
 // Utils
 import { ROUTES } from './utils/constants.js';
 
 function AppContent() {
   const location = useLocation();
-  const isAdminRoute = location.pathname.startsWith(ROUTES.ADMIN);
+
+  // Check if current route is an admin route
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   if (isAdminRoute) {
     // Admin routes get their own layout without main site header/footer
     return (
       <div className="min-h-screen">
         <Routes>
-          <Route path={`${ROUTES.ADMIN}/*`} element={<Admin />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route 
+            path={`${ROUTES.ADMIN}/*`} 
+            element={
+              <ProtectedRoute>
+                <Admin />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
         
         {/* Toast Notifications */}
@@ -60,7 +76,14 @@ function AppContent() {
           <Route path={`${ROUTES.PRODUCT}/:slug`} element={<ProductDetail />} />
           <Route path={ROUTES.CART} element={<Cart />} />
           <Route path={ROUTES.CHECKOUT} element={<Checkout />} />
-          <Route path={ROUTES.ACCOUNT} element={<Account />} />
+          <Route 
+            path={ROUTES.ACCOUNT} 
+            element={
+              <CustomerProtectedRoute>
+                <Account />
+              </CustomerProtectedRoute>
+            } 
+          />
           
           {/* Catch all route - redirect to home */}
           <Route path="*" element={<Home />} />
@@ -90,9 +113,11 @@ function AppContent() {
 
 function App() {
   return (
-    <Router>
-      <AppContent />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <AppContent />
+      </Router>
+    </AuthProvider>
   );
 }
 

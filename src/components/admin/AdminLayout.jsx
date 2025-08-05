@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   LayoutDashboard, 
   Package, 
@@ -8,13 +8,21 @@ import {
   Settings, 
   Users,
   Menu,
-  X
+  X,
+  LogOut,
+  User
 } from 'lucide-react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext.jsx';
 
 const AdminLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const userMenuRef = useRef(null);
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -31,6 +39,36 @@ const AdminLayout = ({ children }) => {
       return location.pathname === '/admin';
     }
     return location.pathname.startsWith(href);
+  };
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await signOut();
+      if (error) {
+        toast.error('Error signing out');
+        console.error('Logout error:', error);
+      } else {
+        toast.success('Logged out successfully');
+        navigate('/admin/login');
+      }
+    } catch (error) {
+      toast.error('Error signing out');
+      console.error('Logout error:', error);
+    }
   };
 
   return (
@@ -106,7 +144,33 @@ const AdminLayout = ({ children }) => {
             
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-600">
-                Welcome back, Admin
+                Welcome back, {user?.email?.split('@')[0] || 'Admin'}
+              </div>
+              
+              {/* User Menu */}
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center space-x-2 p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  <User className="h-5 w-5" />
+                </button>
+                
+                {showUserMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
+                    <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
+                      <div className="font-medium">Signed in as</div>
+                      <div className="text-gray-500 truncate">{user?.email}</div>
+                    </div>
+                    <button
+                      onClick={handleLogout}
+                      className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign out
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>

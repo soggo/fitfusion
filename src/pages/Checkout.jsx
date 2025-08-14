@@ -18,15 +18,9 @@ import {
 import useCartStore from '../store/cartStore.js';
 import { formatPrice, validateEmail, validatePhone, validateRequired, getProductPrimaryImage } from '../utils/helpers.js';
 import { 
-  validateCardNumber, 
-  validateExpiryDate, 
-  validateCVV,
   calculateShipping,
   calculateTax,
-  generateOrderNumber,
   validateNigerianPhone,
-  formatCardNumber,
-  formatExpiryDate,
   createWhatsAppMessage,
   openWhatsApp
 } from '../utils/checkoutHelpers.js';
@@ -80,10 +74,8 @@ const Checkout = () => {
              watchedValues.state && watchedValues.postalCode;
     }
     if (currentStep === 2) {
-      return watchedValues.cardNumber && validateCardNumber(watchedValues.cardNumber) && 
-             watchedValues.cardName && validateRequired(watchedValues.cardName) && 
-             watchedValues.expiryDate && validateExpiryDate(watchedValues.expiryDate) && 
-             watchedValues.cvv && validateCVV(watchedValues.cvv);
+      // No card fields; user will be redirected to Paystack
+      return true;
     }
     return true;
   };
@@ -100,55 +92,41 @@ const Checkout = () => {
 
   const handlePlaceOrder = async (data) => {
     setIsProcessing(true);
-    
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Generate order number
-      const newOrderNumber = generateOrderNumber();
-      setOrderNumber(newOrderNumber);
-      
-      // Save order details
-      const orderData = {
-        orderNumber: newOrderNumber,
-        items: items,
-        shipping: {
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email,
-          phone: data.phone,
+      const payload = {
+        email: data.email,
+        phone: data.phone,
+        shipping_address: {
+          first_name: data.firstName,
+          last_name: data.lastName,
           address: data.address,
           city: data.city,
           state: data.state,
-          postalCode: data.postalCode
+          postal_code: data.postalCode,
+          email: data.email,
+          phone: data.phone,
         },
-        payment: {
-          cardName: data.cardName,
-          cardNumber: data.cardNumber,
-          expiryDate: data.expiryDate
-        },
-        totals: {
-          subtotal,
-          shipping,
-          tax,
-          total
-        },
-        orderDate: new Date().toISOString()
+        items: items,
+        totals: { subtotal, shipping, tax, total },
+        currency: 'NGN'
       };
-      
-      setOrderDetails(orderData);
-      
-      // Clear cart
-      clearCart();
-      
-      // Show success
-      setOrderComplete(true);
-      toast.success('Order placed successfully!');
-      
+
+      const res = await fetch('/.netlify/functions/paystack-init', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await res.json();
+      if (!res.ok) {
+        throw new Error(result?.error || 'Failed to initialize payment');
+      }
+
+      // Redirect to Paystack hosted page
+      window.location.href = result.authorization_url;
     } catch (error) {
-      toast.error('Failed to place order. Please try again.');
-    } finally {
+      console.error(error);
+      toast.error(error.message || 'Payment initialization failed');
       setIsProcessing(false);
     }
   };
@@ -403,78 +381,9 @@ const Checkout = () => {
                   <div className="space-y-6">
                     <div>
                       <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                        Payment Information
+                        Payment Method
                       </h2>
-                      
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Card Number *
-                          </label>
-                          <Input
-                            {...register('cardNumber', { 
-                              required: 'Card number is required',
-                              validate: (value) => validateCardNumber(value) || 'Please enter a valid card number'
-                            })}
-                            placeholder="1234 5678 9012 3456"
-                            error={errors.cardNumber?.message}
-                            onChange={(e) => {
-                              const formatted = formatCardNumber(e.target.value);
-                              e.target.value = formatted;
-                              setValue('cardNumber', formatted);
-                            }}
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            Name on Card *
-                          </label>
-                          <Input
-                            {...register('cardName', { 
-                              required: 'Name on card is required',
-                              validate: validateRequired 
-                            })}
-                            placeholder="Enter name as it appears on card"
-                            error={errors.cardName?.message}
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              Expiry Date *
-                            </label>
-                            <Input
-                              {...register('expiryDate', { 
-                                required: 'Expiry date is required',
-                                validate: (value) => validateExpiryDate(value) || 'Please enter a valid expiry date'
-                              })}
-                              placeholder="MM/YY"
-                              error={errors.expiryDate?.message}
-                              onChange={(e) => {
-                                const formatted = formatExpiryDate(e.target.value);
-                                e.target.value = formatted;
-                                setValue('expiryDate', formatted);
-                              }}
-                            />
-                          </div>
-                          
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
-                              CVV *
-                            </label>
-                            <Input
-                              {...register('cvv', { 
-                                required: 'CVV is required',
-                                validate: (value) => validateCVV(value) || 'Please enter a valid CVV'
-                              })}
-                              placeholder="123"
-                              error={errors.cvv?.message}
-                            />
-                          </div>
-                        </div>
-                      </div>
+                      <p className="text-sm text-gray-600">You'll be redirected to Paystack to complete your payment securely.</p>
                     </div>
                   </div>
 
@@ -482,8 +391,8 @@ const Checkout = () => {
                     <Button type="button" variant="outline" onClick={handlePrevStep}>
                       Back to Shipping
                     </Button>
-                    <Button type="submit" disabled={!validateForm()}>
-                      Review Order
+                    <Button type="submit">
+                      Continue
                     </Button>
                   </div>
                 </form>
@@ -512,11 +421,9 @@ const Checkout = () => {
 
                       {/* Payment Information Review */}
                       <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                        <h3 className="font-medium text-gray-900 mb-2">Payment Information</h3>
+                        <h3 className="font-medium text-gray-900 mb-2">Payment Method</h3>
                         <div className="text-sm text-gray-600">
-                          <p>{watchedValues.cardName}</p>
-                          <p>•••• •••• •••• {watchedValues.cardNumber?.slice(-4)}</p>
-                          <p>Expires: {watchedValues.expiryDate}</p>
+                          <p>Pay securely via Paystack after clicking the button below.</p>
                         </div>
                       </div>
                     </div>
@@ -526,12 +433,8 @@ const Checkout = () => {
                     <Button type="button" variant="outline" onClick={handlePrevStep}>
                       Back to Payment
                     </Button>
-                    <Button 
-                      onClick={handleSubmit(handlePlaceOrder)}
-                      disabled={isProcessing}
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      {isProcessing ? 'Processing...' : 'Place Order'}
+                    <Button onClick={handleSubmit(handlePlaceOrder)} disabled={isProcessing} className="bg-green-600 hover:bg-green-700">
+                      {isProcessing ? 'Redirecting...' : 'Pay with Paystack'}
                     </Button>
                   </div>
                 </div>

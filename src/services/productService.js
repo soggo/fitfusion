@@ -1,15 +1,31 @@
 import { supabase } from '../lib/supabase.js';
 
+// Prevent long hangs on slow networks or stalled connections
+const withTimeout = async (promise, ms = 12000) => {
+  let timeoutId;
+  const timeoutPromise = new Promise((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error('Request timed out')), ms);
+  });
+  try {
+    return await Promise.race([promise, timeoutPromise]);
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
+
 export const productService = {
   // Get all products with related data
   async getAllProducts() {
-    const { data, error } = await supabase
-      .from('products')
-      .select(`
-        *,
-        category:categories(*)
-      `)
-      .order('created_at', { ascending: false });
+    const { data, error } = await withTimeout(
+      supabase
+        .from('products')
+        .select(`
+          *,
+          category:categories(*)
+        `)
+        .order('created_at', { ascending: false }),
+      12000
+    );
     
     if (error) {
       console.error('Error fetching products:', error);
@@ -20,14 +36,17 @@ export const productService = {
 
   // Get a single product by ID
   async getProductById(id) {
-    const { data, error } = await supabase
-      .from('products')
-      .select(`
-        *,
-        category:categories(*)
-      `)
-      .eq('id', id)
-      .single();
+    const { data, error } = await withTimeout(
+      supabase
+        .from('products')
+        .select(`
+          *,
+          category:categories(*)
+        `)
+        .eq('id', id)
+        .single(),
+      12000
+    );
     
     if (error) {
       console.error('Error fetching product:', error);
@@ -38,15 +57,18 @@ export const productService = {
 
   // Get featured products
   async getFeaturedProducts() {
-    const { data, error } = await supabase
-      .from('products')
-      .select(`
-        *,
-        category:categories(*)
-      `)
-      .eq('featured', true)
-      .limit(8)
-      .order('created_at', { ascending: false });
+    const { data, error } = await withTimeout(
+      supabase
+        .from('products')
+        .select(`
+          *,
+          category:categories(*)
+        `)
+        .eq('featured', true)
+        .limit(8)
+        .order('created_at', { ascending: false }),
+      12000
+    );
     
     if (error) {
       console.error('Error fetching featured products:', error);
@@ -57,14 +79,17 @@ export const productService = {
 
   // Get products by category
   async getProductsByCategory(categorySlug) {
-    const { data, error } = await supabase
-      .from('products')
-      .select(`
-        *,
-        category:categories(*)
-      `)
-      .eq('category.slug', categorySlug)
-      .order('created_at', { ascending: false });
+    const { data, error } = await withTimeout(
+      supabase
+        .from('products')
+        .select(`
+          *,
+          category:categories(*)
+        `)
+        .eq('category.slug', categorySlug)
+        .order('created_at', { ascending: false }),
+      12000
+    );
     
     if (error) {
       console.error('Error fetching products by category:', error);
@@ -75,10 +100,13 @@ export const productService = {
 
   // Get all categories
   async getAllCategories() {
-    const { data, error } = await supabase
-      .from('categories')
-      .select('*')
-      .order('name', { ascending: true });
+    const { data, error } = await withTimeout(
+      supabase
+        .from('categories')
+        .select('*')
+        .order('name', { ascending: true }),
+      12000
+    );
     
     if (error) {
       console.error('Error fetching categories:', error);
@@ -89,14 +117,17 @@ export const productService = {
 
   // Search products
   async searchProducts(query) {
-    const { data, error } = await supabase
-      .from('products')
-      .select(`
-        *,
-        category:categories(*)
-      `)
-      .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
-      .order('created_at', { ascending: false });
+    const { data, error } = await withTimeout(
+      supabase
+        .from('products')
+        .select(`
+          *,
+          category:categories(*)
+        `)
+        .or(`name.ilike.%${query}%,description.ilike.%${query}%`)
+        .order('created_at', { ascending: false }),
+      12000
+    );
     
     if (error) {
       console.error('Error searching products:', error);
@@ -107,11 +138,14 @@ export const productService = {
 
   // Create a new product
   async createProduct(productData) {
-    const { data, error } = await supabase
-      .from('products')
-      .insert([productData])
-      .select()
-      .single();
+    const { data, error } = await withTimeout(
+      supabase
+        .from('products')
+        .insert([productData])
+        .select()
+        .single(),
+      12000
+    );
     
     if (error) {
       console.error('Error creating product:', error);
@@ -122,12 +156,15 @@ export const productService = {
 
   // Update an existing product
   async updateProduct(id, productData) {
-    const { data, error } = await supabase
-      .from('products')
-      .update(productData)
-      .eq('id', id)
-      .select()
-      .single();
+    const { data, error } = await withTimeout(
+      supabase
+        .from('products')
+        .update(productData)
+        .eq('id', id)
+        .select()
+        .single(),
+      12000
+    );
     
     if (error) {
       console.error('Error updating product:', error);
@@ -138,12 +175,15 @@ export const productService = {
 
   // Update product images
   async updateProductImages(productId, images) {
-    const { data, error } = await supabase
-      .from('products')
-      .update({ images })
-      .eq('id', productId)
-      .select()
-      .single();
+    const { data, error } = await withTimeout(
+      supabase
+        .from('products')
+        .update({ images })
+        .eq('id', productId)
+        .select()
+        .single(),
+      12000
+    );
     
     if (error) {
       console.error('Error updating product images:', error);
@@ -154,10 +194,13 @@ export const productService = {
 
   // Delete a product
   async deleteProduct(id) {
-    const { data, error } = await supabase
-      .from('products')
-      .delete()
-      .eq('id', id);
+    const { data, error } = await withTimeout(
+      supabase
+        .from('products')
+        .delete()
+        .eq('id', id),
+      12000
+    );
     
     if (error) {
       console.error('Error deleting product:', error);
@@ -168,11 +211,14 @@ export const productService = {
 
   // Get category by slug
   async getCategoryBySlug(slug) {
-    const { data, error } = await supabase
-      .from('categories')
-      .select('*')
-      .eq('slug', slug)
-      .single();
+    const { data, error } = await withTimeout(
+      supabase
+        .from('categories')
+        .select('*')
+        .eq('slug', slug)
+        .single(),
+      12000
+    );
     
     if (error) {
       console.error('Error fetching category:', error);
@@ -183,11 +229,14 @@ export const productService = {
 
   // Create a new category
   async createCategory(categoryData) {
-    const { data, error } = await supabase
-      .from('categories')
-      .insert([categoryData])
-      .select()
-      .single();
+    const { data, error } = await withTimeout(
+      supabase
+        .from('categories')
+        .insert([categoryData])
+        .select()
+        .single(),
+      12000
+    );
     
     if (error) {
       console.error('Error creating category:', error);
@@ -198,12 +247,15 @@ export const productService = {
 
   // Update a category
   async updateCategory(id, categoryData) {
-    const { data, error } = await supabase
-      .from('categories')
-      .update(categoryData)
-      .eq('id', id)
-      .select()
-      .single();
+    const { data, error } = await withTimeout(
+      supabase
+        .from('categories')
+        .update(categoryData)
+        .eq('id', id)
+        .select()
+        .single(),
+      12000
+    );
     
     if (error) {
       console.error('Error updating category:', error);

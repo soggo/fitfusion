@@ -30,6 +30,19 @@ const useProductStore = create((set, get) => ({
   currentPage: 1,
   itemsPerPage: 12,
 
+  // Utility to prevent long hangs on slow networks
+  withTimeout: async (promise, ms = 12000) => {
+    let timeoutId;
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => reject(new Error('Request timed out')), ms);
+    });
+    try {
+      return await Promise.race([promise, timeoutPromise]);
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  },
+
   // Initialize data from database
   initializeData: async () => {
     const { initialized } = get();
@@ -39,10 +52,13 @@ const useProductStore = create((set, get) => ({
     
     try {
       // Fetch data from database
-      const [productsData, categoriesData] = await Promise.all([
-        productService.getAllProducts(),
-        productService.getAllCategories()
-      ]);
+      const [productsData, categoriesData] = await get().withTimeout(
+        Promise.all([
+          productService.getAllProducts(),
+          productService.getAllCategories()
+        ]),
+        12000
+      );
 
       // Transform database data to match UI expectations
       const transformedProducts = productsData.map(product => ({

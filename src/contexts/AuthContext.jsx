@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 import { supabase } from '../lib/supabase.js';
 
 const AuthContext = createContext({});
@@ -15,23 +15,37 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const isMountedRef = useRef(true);
+
+  // Utility to prevent long hangs on slow networks
+  const withTimeout = (promise, ms = 10000) => {
+    let timeoutId;
+    const timeoutPromise = new Promise((_, reject) => {
+      timeoutId = setTimeout(() => reject(new Error('Request timed out')), ms);
+    });
+    return Promise.race([promise, timeoutPromise]).finally(() => clearTimeout(timeoutId));
+  };
 
   useEffect(() => {
     // Get initial session
     const getInitialSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
+        if (!isMountedRef.current) return;
         setUser(session?.user ?? null);
         
         // If user exists, fetch their profile
         if (session?.user) {
-          await fetchUserProfile(session.user.id);
+          // Fire-and-forget; do not block auth readiness on profile
+          fetchUserProfile(session.user.id);
         }
       } catch (error) {
         console.error('Error getting initial session:', error);
+        if (!isMountedRef.current) return;
         setUser(null);
         setProfile(null);
       } finally {
+        if (!isMountedRef.current) return;
         setLoading(false);
       }
     };
@@ -40,44 +54,55 @@ export const AuthProvider = ({ children }) => {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state change:', event, session?.user?.email);
+      async (_event, session) => {
+        console.log('Auth state change:', _event, session?.user?.email);
         
         try {
+          if (!isMountedRef.current) return;
           setUser(session?.user ?? null);
           
           if (session?.user) {
-            await fetchUserProfile(session.user.id);
+            // Fire-and-forget; do not block auth readiness on profile
+            fetchUserProfile(session.user.id);
           } else {
             setProfile(null);
           }
         } catch (error) {
           console.error('Error handling auth state change:', error);
+          if (!isMountedRef.current) return;
           setUser(null);
           setProfile(null);
         } finally {
+          if (!isMountedRef.current) return;
           setLoading(false);
         }
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isMountedRef.current = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Fetch user profile from user_profiles table
   const fetchUserProfile = async (userId) => {
     try {
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .select('*')
-        .eq('id', userId)
-        .single();
+      const { data, error } = await withTimeout(
+        supabase
+          .from('user_profiles')
+          .select('*')
+          .eq('id', userId)
+          .single(),
+        10000
+      );
       
       if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
         console.error('Error fetching profile:', error);
         return;
       }
       
+      if (!isMountedRef.current) return;
       setProfile(data || null);
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -139,15 +164,18 @@ export const AuthProvider = ({ children }) => {
     if (!user) return { error: { message: 'No user logged in' } };
     
     try {
-      const { data, error } = await supabase
-        .from('user_profiles')
-        .upsert({ 
-          id: user.id, 
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
-        .select()
-        .single();
+      const { data, error } = await withTimeout(
+        supabase
+          .from('user_profiles')
+          .upsert({ 
+            id: user.id, 
+            ...updates,
+            updated_at: new Date().toISOString()
+          })
+          .select()
+          .single(),
+        10000
+      );
       
       if (!error) {
         setProfile(data);
@@ -164,12 +192,15 @@ export const AuthProvider = ({ children }) => {
     if (!user) return { data: [], error: { message: 'No user logged in' } };
     
     try {
-      const { data, error } = await supabase
-        .from('user_addresses')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('is_default', { ascending: false })
-        .order('created_at', { ascending: false });
+      const { data, error } = await withTimeout(
+        supabase
+          .from('user_addresses')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('is_default', { ascending: false })
+          .order('created_at', { ascending: false }),
+        10000
+      );
       
       return { data: data || [], error };
     } catch (error) {
@@ -184,21 +215,27 @@ export const AuthProvider = ({ children }) => {
     try {
       // If this is set as default, unset other defaults first
       if (addressData.is_default) {
-        await supabase
-          .from('user_addresses')
-          .update({ is_default: false })
-          .eq('user_id', user.id)
-          .eq('type', addressData.type || 'shipping');
+        await withTimeout(
+          supabase
+            .from('user_addresses')
+            .update({ is_default: false })
+            .eq('user_id', user.id)
+            .eq('type', addressData.type || 'shipping'),
+          10000
+        );
       }
 
-      const { data, error } = await supabase
-        .from('user_addresses')
-        .insert({
-          user_id: user.id,
-          ...addressData
-        })
-        .select()
-        .single();
+      const { data, error } = await withTimeout(
+        supabase
+          .from('user_addresses')
+          .insert({
+            user_id: user.id,
+            ...addressData
+          })
+          .select()
+          .single(),
+        10000
+      );
       
       return { data, error };
     } catch (error) {
@@ -213,23 +250,29 @@ export const AuthProvider = ({ children }) => {
     try {
       // If setting as default, unset other defaults first
       if (updates.is_default) {
-        await supabase
-          .from('user_addresses')
-          .update({ is_default: false })
-          .eq('user_id', user.id)
-          .eq('type', updates.type || 'shipping');
+        await withTimeout(
+          supabase
+            .from('user_addresses')
+            .update({ is_default: false })
+            .eq('user_id', user.id)
+            .eq('type', updates.type || 'shipping'),
+          10000
+        );
       }
 
-      const { data, error } = await supabase
-        .from('user_addresses')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', addressId)
-        .eq('user_id', user.id)
-        .select()
-        .single();
+      const { data, error } = await withTimeout(
+        supabase
+          .from('user_addresses')
+          .update({
+            ...updates,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', addressId)
+          .eq('user_id', user.id)
+          .select()
+          .single(),
+        10000
+      );
       
       return { data, error };
     } catch (error) {
@@ -242,11 +285,14 @@ export const AuthProvider = ({ children }) => {
     if (!user) return { error: { message: 'No user logged in' } };
     
     try {
-      const { error } = await supabase
-        .from('user_addresses')
-        .delete()
-        .eq('id', addressId)
-        .eq('user_id', user.id);
+      const { error } = await withTimeout(
+        supabase
+          .from('user_addresses')
+          .delete()
+          .eq('id', addressId)
+          .eq('user_id', user.id),
+        10000
+      );
       
       return { error };
     } catch (error) {
@@ -260,21 +306,24 @@ export const AuthProvider = ({ children }) => {
     
     try {
       // This will work once orders table is properly set up
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          order_items (
+      const { data, error } = await withTimeout(
+        supabase
+          .from('orders')
+          .select(`
             *,
-            product:products (
-              name,
-              slug,
-              images
+            order_items (
+              *,
+              product:products (
+                name,
+                slug,
+                images
+              )
             )
-          )
-        `)
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+          `)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false }),
+        12000
+      );
       
       return { data: data || [], error };
     } catch (error) {

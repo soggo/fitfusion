@@ -13,6 +13,7 @@ import Shop from './pages/Shop.jsx';
 import ProductDetail from './pages/ProductDetail.jsx';
 import Cart from './pages/Cart.jsx';
 import Checkout from './pages/Checkout.jsx';
+import CheckoutCallback from './pages/CheckoutCallback.jsx';
 import Account from './pages/Account.jsx';
 import Admin from './pages/Admin.jsx';
 import AdminLogin from './pages/AdminLogin.jsx';
@@ -76,6 +77,7 @@ function AppContent() {
           <Route path={`${ROUTES.PRODUCT}/:slug`} element={<ProductDetail />} />
           <Route path={ROUTES.CART} element={<Cart />} />
           <Route path={ROUTES.CHECKOUT} element={<Checkout />} />
+          <Route path="/checkout/callback" element={<CheckoutCallback />} />
           <Route 
             path={ROUTES.ACCOUNT} 
             element={
